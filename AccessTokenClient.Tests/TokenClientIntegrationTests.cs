@@ -13,15 +13,6 @@ namespace AccessTokenClient.Tests
         {
             var services = new ServiceCollection();
 
-            //services.AddRedisCaching(cacheOptions =>
-            //{
-            //    cacheOptions.WithExpiration(30).Build();
-            //},
-            //redisOptions =>
-            //{
-            //    redisOptions.WithClientName("TokenRedisClient").UseEndpoint("localhost", "6379");
-            //});
-
             services.AddTokenClient();
 
             var provider = services.BuildServiceProvider();
