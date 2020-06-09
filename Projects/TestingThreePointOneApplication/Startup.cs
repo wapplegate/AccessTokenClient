@@ -1,3 +1,4 @@
+using AccessTokenClient;
 using AccessTokenClient.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -19,7 +20,21 @@ namespace TestingThreePointOneApplication
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddMemoryCache();
+
             services.AddTokenClient();
+
+            // Register the options for the client:
+            services.AddSingleton(new TestingClientOptions
+            {
+                ClientIdentifier = "client",
+                ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
+                Scopes           = new[] {"api1"},
+                TokenEndpoint    = "https://localhost:44342/connect/token"
+            });
+
+            // Register the client and specify that the access token delegating handler be used:
+            services.AddHttpClient<ITestingClient, TestingClient>().AddClientAccessTokenHandler<TestingClientOptions>();
 
             services.AddControllers();
         }
@@ -36,10 +51,7 @@ namespace TestingThreePointOneApplication
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints =>
-            {
-                endpoints.MapControllers();
-            });
+            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

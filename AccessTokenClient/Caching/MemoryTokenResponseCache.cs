@@ -1,25 +1,29 @@
-﻿using System;
-using System.Collections.Concurrent;
+﻿using Microsoft.Extensions.Caching.Memory;
+using System;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
 {
     public class MemoryTokenResponseCache : ITokenResponseCache
     {
-        private static readonly ConcurrentDictionary<string, CacheItem<TokenResponse>> Dictionary;
+        private readonly IMemoryCache cache;
 
-        static MemoryTokenResponseCache()
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryTokenResponseCache"/> class.
+        /// </summary>
+        /// <param name="cache">The memory cache.</param>
+        public MemoryTokenResponseCache(IMemoryCache cache)
         {
-            Dictionary = new ConcurrentDictionary<string, CacheItem<TokenResponse>>();
+            this.cache = cache ?? throw new ArgumentNullException(nameof(cache));
         }
 
         /// <inheritdoc />
-        public Task<bool> KeyExists(string key) => Task.FromResult(Dictionary.ContainsKey(key));
+        public Task<bool> KeyExists(string key) => Task.FromResult(cache.TryGetValue(key, out var _));
 
         /// <inheritdoc />
         public Task<TokenGetResult<TokenResponse>> Get(string key)
         {
-            var exists = Dictionary.TryGetValue(key, out var cacheItem);
+            var exists = cache.TryGetValue<TokenResponse>(key, out var cacheItem);
 
             if (!exists)
             {
@@ -30,21 +34,10 @@ namespace AccessTokenClient.Caching
                 });
             }
 
-            if (DateTimeOffset.Now - cacheItem.Created >= cacheItem.ExpiresAfter)
-            {
-                Dictionary.TryRemove(key, out var _);
-
-                return Task.FromResult(new TokenGetResult<TokenResponse>
-                {
-                    Successful = false,
-                    Value      = null
-                });
-            }
-
             var result = new TokenGetResult<TokenResponse>
             {
                 Successful = true,
-                Value      = cacheItem.Value
+                Value      = cacheItem
             };
 
             return Task.FromResult(result);
@@ -53,9 +46,7 @@ namespace AccessTokenClient.Caching
         /// <inheritdoc />
         public Task<bool> Set(string key, TokenResponse response, TimeSpan expiration)
         {
-            var cacheItem = new CacheItem<TokenResponse>(response, expiration);
-
-            Dictionary[key] = cacheItem;
+            cache.Set(key, response, expiration);
 
             return Task.FromResult(true);
         }
