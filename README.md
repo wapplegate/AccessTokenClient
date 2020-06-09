@@ -54,4 +54,4 @@ var tokenResponse = await client.RequestAccessToken(new TokenRequest
 });
 ```
 
-The `IAccessTokenClient` interface has one method `RequestAccessToken`. This method will make a `client_credentials` OAuth request to the specified endpoint using the supplied client identifier, client secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.
+The `IAccessTokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the `client_credentials` grant from the specified endpoint using the supplied identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.
