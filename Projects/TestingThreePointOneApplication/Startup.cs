@@ -27,10 +27,10 @@ namespace TestingThreePointOneApplication
             // Register the options for the client:
             services.AddSingleton(new TestingClientOptions
             {
+                TokenEndpoint    = "https://localhost:44342/connect/token",
                 ClientIdentifier = "client",
                 ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
-                Scopes           = new[] {"api1"},
-                TokenEndpoint    = "https://localhost:44342/connect/token"
+                Scopes           = new[] { "api1" }
             });
 
             // Register the client and specify that the access token delegating handler be used:
