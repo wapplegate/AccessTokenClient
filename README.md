@@ -1,6 +1,6 @@
 ## About
 
-This library provides a token client that can be used when you need to make `client_credentials` OAuth requests. Instead of re-writing the same token clients over and over again in your services, you can use this package to make those token requests easily. The package also includes advanced features like encryption and caching so access tokens can be reused.
+This library provides a token client that can be used when you need to make `client_credentials` OAuth requests. Instead of re-writing the same token clients over and over again in your services, you can use this package to make those token requests easily. The package also includes the ability to cache access tokens so they can be reused.
 
 ## Installation
 
