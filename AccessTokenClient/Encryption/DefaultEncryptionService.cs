@@ -1,5 +1,8 @@
 ﻿namespace AccessTokenClient.Encryption
 {
+    /// <summary>
+    /// The default encryption service which provides no encryption or decryption.
+    /// </summary>
     public class DefaultEncryptionService : IEncryptionService
     {
         /// <inheritdoc />

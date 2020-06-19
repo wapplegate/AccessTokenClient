@@ -46,10 +46,10 @@ namespace AccessTokenClient.Tests
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
             var mockCipherService = new Mock<IEncryptionService>();
 
-            // Set-up the identity client, token client, and the caching decorator:
+            // Set-up the access token client, token client, and the caching decorator:
             var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
 
-            var decorator = new TokenClientCachingDecorator(
+            IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient, 
                 cacheMock.Object, 
                 keyGeneratorMock.Object, 
@@ -57,7 +57,9 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            var tokenResponse = await decorator.GetAccessToken(new TokenRequest
+            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+
+            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -96,7 +98,7 @@ namespace AccessTokenClient.Tests
             // Set-up the token client and the caching decorator:
             var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
 
-            var decorator = new TokenClientCachingDecorator(
+            IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
@@ -104,7 +106,9 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            var tokenResponse = await decorator.GetAccessToken(new TokenRequest
+            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+
+            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -143,7 +147,7 @@ namespace AccessTokenClient.Tests
             // Set-up the token client and the caching decorator:
             var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
 
-            var decorator = new TokenClientCachingDecorator(
+            var cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
                 cacheMock.Object,
                 keyGeneratorMock.Object,
@@ -151,7 +155,9 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            var tokenResponse = await decorator.GetAccessToken(new TokenRequest
+            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+
+            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",

@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using System;
+﻿using System;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading;
@@ -13,6 +12,11 @@ namespace AccessTokenClient
 
         private readonly IAccessTokenClient client;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AccessTokenDelegatingHandler"/> class.
+        /// </summary>
+        /// <param name="options">The token endpoint options.</param>
+        /// <param name="client">The access token client.</param>
         public AccessTokenDelegatingHandler(ITokenEndpointOptions options, IAccessTokenClient client)
         {
             this.options = options ?? throw new ArgumentNullException(nameof(options));
@@ -37,32 +41,6 @@ namespace AccessTokenClient
             var response = await base.SendAsync(request, cancellationToken);
 
             return response;
-        }
-    }
-
-    public interface ITokenEndpointOptions
-    {
-        string TokenEndpoint { get; set; }
-
-        string ClientIdentifier { get; set; }
-
-        string ClientSecret { get; set; }
-
-        string[] Scopes { get; set; }
-    }
-
-    public static class HttpClientBuilderExtensions
-    {
-        public static IHttpClientBuilder AddClientAccessTokenHandler<T>(this IHttpClientBuilder httpClientBuilder) where T : ITokenEndpointOptions
-        {
-            return httpClientBuilder.AddHttpMessageHandler(provider =>
-            {
-                var options = provider.GetRequiredService<T>();
-                
-                var tokenClient = provider.GetRequiredService<IAccessTokenClient>();
-
-                return new AccessTokenDelegatingHandler(options, tokenClient);
-            });
         }
     }
 }
