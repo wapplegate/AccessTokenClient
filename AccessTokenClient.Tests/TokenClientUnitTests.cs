@@ -47,7 +47,7 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the access token client, token client, and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
+            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
 
             IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient, 
@@ -96,7 +96,7 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
+            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
 
             IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
@@ -145,7 +145,7 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new NewtonsoftResponseDeserializer());
+            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
 
             var cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
