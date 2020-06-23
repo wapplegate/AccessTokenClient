@@ -32,7 +32,7 @@ namespace AccessTokenClient.Extensions
             services.TryAddTransient<IKeyGenerator, TokenRequestKeyGenerator>();
             services.TryAddTransient<ITokenResponseCache, MemoryTokenResponseCache>();
             services.TryAddTransient<IEncryptionService, DefaultEncryptionService>();
-            services.TryAddTransient<IResponseDeserializer, NewtonsoftResponseDeserializer>();
+            services.TryAddTransient<IResponseDeserializer, ResponseDeserializer>();
 
             services.AddHttpClient<IAccessTokenClient, AccessTokenClient>();
 

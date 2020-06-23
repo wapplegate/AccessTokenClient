@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+﻿using System.Text.Json.Serialization;
 
 namespace AccessTokenClient
 {
@@ -7,19 +7,19 @@ namespace AccessTokenClient
         /// <summary>
         /// Gets or sets the access token.
         /// </summary>
-        [JsonProperty("access_token")]
+        [JsonPropertyName("access_token")]
         public string AccessToken { get; set; }
 
         /// <summary>
         /// Gets or sets the token type.
         /// </summary>
-        [JsonProperty("token_type")]
+        [JsonPropertyName("token_type")]
         public string TokenType { get; set; }
 
         /// <summary>
         /// Gets or sets the expiration for the token in seconds.
         /// </summary>
-        [JsonProperty("expires_in")]
+        [JsonPropertyName("expires_in")]
         public int ExpiresIn { get; set; }
     }
 }

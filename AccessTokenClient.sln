@@ -13,11 +13,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccessTokenClient.Extension
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AccessTokenClient.Tests", "AccessTokenClient.Tests\AccessTokenClient.Tests.csproj", "{85484B72-AD4D-4839-B739-9D00119B7111}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestingThreePointOneApplication", "Projects\TestingThreePointOneApplication\TestingThreePointOneApplication.csproj", "{296809C5-05E0-47E3-BB42-85B2034C0EFD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingThreePointOneApplication", "Projects\TestingThreePointOneApplication\TestingThreePointOneApplication.csproj", "{296809C5-05E0-47E3-BB42-85B2034C0EFD}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Projects\Benchmarks\Benchmarks.csproj", "{8A58938A-EBB2-4523-8EEA-322EDCDD1CD3}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer", "Projects\IdentityServer\IdentityServer.csproj", "{FE95D713-B7F9-449A-AE30-3185C0C3BC86}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,10 +47,6 @@ Global
 		{8A58938A-EBB2-4523-8EEA-322EDCDD1CD3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8A58938A-EBB2-4523-8EEA-322EDCDD1CD3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8A58938A-EBB2-4523-8EEA-322EDCDD1CD3}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FE95D713-B7F9-449A-AE30-3185C0C3BC86}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{FE95D713-B7F9-449A-AE30-3185C0C3BC86}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{FE95D713-B7F9-449A-AE30-3185C0C3BC86}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{FE95D713-B7F9-449A-AE30-3185C0C3BC86}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -61,7 +55,6 @@ Global
 		{99F98F6C-BFB5-4ACC-9986-B18A870BACD8} = {469EAEB0-3EDA-4280-8981-6892639E50AE}
 		{296809C5-05E0-47E3-BB42-85B2034C0EFD} = {469EAEB0-3EDA-4280-8981-6892639E50AE}
 		{8A58938A-EBB2-4523-8EEA-322EDCDD1CD3} = {469EAEB0-3EDA-4280-8981-6892639E50AE}
-		{FE95D713-B7F9-449A-AE30-3185C0C3BC86} = {469EAEB0-3EDA-4280-8981-6892639E50AE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {554F02C5-5D61-4F2F-AEB0-60790E05B434}

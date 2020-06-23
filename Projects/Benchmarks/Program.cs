@@ -7,13 +7,16 @@ using System.Threading.Tasks;
 
 namespace Benchmarks
 {
-    public class Parsing
+    public class AccessTokenClientBenchmark
     {
         private readonly IAccessTokenClient client;
 
-        public Parsing()
+        public AccessTokenClientBenchmark()
         {
-            var services = new ServiceCollection();
+            IServiceCollection services = new ServiceCollection();
+
+            services.AddMemoryCache();
+
             services.AddTokenClient();
             var provider = services.BuildServiceProvider();
 
@@ -23,15 +26,17 @@ namespace Benchmarks
         }
 
         [Benchmark]
-        public async Task GetToken()
+        public async Task<TokenResponse> GetToken()
         {
             var tokenResponse = await client.GetAccessToken(new TokenRequest
             {
                 ClientIdentifier = "client",
                 ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
                 Scopes           = new[] {"api1"},
-                TokenEndpoint    = "https://localhost:5001/connect/token"
+                TokenEndpoint    = "https://localhost:44342//connect/token"
             });
+
+            return tokenResponse;
         }
     }
 
@@ -39,7 +44,7 @@ namespace Benchmarks
     {
         public static async Task Main()
         {
-            var summary = BenchmarkRunner.Run<Parsing>();
+            var summary = BenchmarkRunner.Run<AccessTokenClientBenchmark>();
         }
     }
 }
