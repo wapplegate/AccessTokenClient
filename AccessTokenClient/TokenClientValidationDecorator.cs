@@ -12,7 +12,7 @@ namespace AccessTokenClient
             this.decoratedClient = decoratedClient;
         }
 
-        public async Task<TokenResponse> GetAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
             if (string.IsNullOrWhiteSpace(request.TokenEndpoint))
             {
@@ -29,7 +29,7 @@ namespace AccessTokenClient
                 throw new Exception("A client secret has not been specified.");
             }
 
-            var tokenResponse = await decoratedClient.GetAccessToken(request, execute);
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 
             return tokenResponse;
         }

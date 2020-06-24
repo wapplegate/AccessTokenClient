@@ -46,7 +46,7 @@ namespace AccessTokenClient.Caching
         /// <param name="request">The token request.</param>
         /// <param name="execute">An optional execute function that will override the default request implementation.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> GetAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
             var key = keyGenerator.GenerateTokenRequestKey(request);
 
@@ -62,7 +62,7 @@ namespace AccessTokenClient.Caching
                 }
             }
 
-            var tokenResponse = await decoratedClient.GetAccessToken(request, execute);
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 
             var expiration = calculator.CalculateExpiration(tokenResponse);
 
