@@ -22,7 +22,7 @@ namespace TestingThreePointOneApplication
         {
             services.AddMemoryCache();
 
-            services.AddTokenClient();
+            services.AddAccessTokenClient();
 
             // Register the options for the client:
             services.AddSingleton(new TestingClientOptions

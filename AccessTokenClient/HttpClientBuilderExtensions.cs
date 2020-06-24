@@ -16,7 +16,7 @@ namespace AccessTokenClient
             {
                 var options = provider.GetRequiredService<T>();
 
-                var tokenClient = provider.GetRequiredService<IAccessTokenClient>();
+                var tokenClient = provider.GetRequiredService<ITokenClient>();
 
                 return new AccessTokenDelegatingHandler(options, tokenClient);
             });

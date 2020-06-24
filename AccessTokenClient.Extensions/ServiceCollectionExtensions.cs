@@ -17,7 +17,7 @@ namespace AccessTokenClient.Extensions
         /// <param name="services">The service collection.</param>
         /// <param name="action">An optional action to configure the token client options.</param>
         /// <returns>The service collection instance.</returns>
-        public static IServiceCollection AddTokenClient(this IServiceCollection services, Action<TokenClientOptions> action = null)
+        public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<TokenClientOptions> action = null)
         {
             if (services == null)
             {
@@ -34,14 +34,14 @@ namespace AccessTokenClient.Extensions
             services.TryAddTransient<IEncryptionService, DefaultEncryptionService>();
             services.TryAddTransient<IResponseDeserializer, ResponseDeserializer>();
 
-            services.AddHttpClient<IAccessTokenClient, AccessTokenClient>();
+            services.AddHttpClient<ITokenClient, TokenClient>();
 
             if (options.EnableCaching)
             {
-                services.TryDecorate<IAccessTokenClient, TokenClientCachingDecorator>();
+                services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
             }
 
-            services.TryDecorate<IAccessTokenClient, ValidationDecorator>();
+            services.TryDecorate<ITokenClient, TokenClientValidationDecorator>();
 
             return services;
         }

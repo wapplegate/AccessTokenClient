@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
-    public interface IAccessTokenClient
+    public interface ITokenClient
     {
         /// <summary>
         /// Executes a token request to the specified endpoint and returns the token response.

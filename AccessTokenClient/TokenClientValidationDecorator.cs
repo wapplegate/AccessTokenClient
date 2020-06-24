@@ -3,11 +3,11 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
-    public class ValidationDecorator : IAccessTokenClient
+    public class TokenClientValidationDecorator : ITokenClient
     {
-        private readonly IAccessTokenClient decoratedClient;
+        private readonly ITokenClient decoratedClient;
 
-        public ValidationDecorator(IAccessTokenClient decoratedClient)
+        public TokenClientValidationDecorator(ITokenClient decoratedClient)
         {
             this.decoratedClient = decoratedClient;
         }

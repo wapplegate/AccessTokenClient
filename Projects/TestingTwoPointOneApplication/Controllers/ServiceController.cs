@@ -8,9 +8,9 @@ namespace TestingTwoPointOneApplication.Controllers
     [Route("service")]
     public class ServiceController : ControllerBase
     {
-        private readonly IAccessTokenClient client;
+        private readonly ITokenClient client;
 
-        public ServiceController(IAccessTokenClient client)
+        public ServiceController(ITokenClient client)
         {
             this.client = client;
         }

@@ -14,7 +14,7 @@ namespace TestingTwoPointOneApplication
 
             services.AddMemoryCache();
 
-            services.AddTokenClient();
+            services.AddAccessTokenClient();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
