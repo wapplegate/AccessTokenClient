@@ -11,9 +11,9 @@ namespace AccessTokenClient.Caching
     /// and executing token requests using the decorated client instance to make token requests
     /// when a cached value does not exist.
     /// </summary>
-    public class TokenClientCachingDecorator : IAccessTokenClient
+    public class TokenClientCachingDecorator : ITokenClient
     {
-        private readonly IAccessTokenClient decoratedClient;
+        private readonly ITokenClient decoratedClient;
 
         private readonly ITokenResponseCache cache;
 
@@ -31,7 +31,7 @@ namespace AccessTokenClient.Caching
         /// <param name="keyGenerator">The key generator.</param>
         /// <param name="calculator">The expiration calculator.</param>
         /// <param name="encryptionService">The encryption service.</param>
-        public TokenClientCachingDecorator(IAccessTokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IEncryptionService encryptionService)
+        public TokenClientCachingDecorator(ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IEncryptionService encryptionService)
         {
             this.decoratedClient   = decoratedClient   ?? throw new ArgumentNullException(nameof(decoratedClient));
             this.cache             = cache             ?? throw new ArgumentNullException(nameof(cache));

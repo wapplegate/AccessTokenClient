@@ -21,7 +21,7 @@ namespace AccessTokenClient.Tests
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
-            var logger         = new NullLogger<AccessTokenClient>();
+            var logger         = new NullLogger<TokenClient>();
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
@@ -47,9 +47,9 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the access token client, token client, and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
-            IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
+            ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient, 
                 cacheMock.Object, 
                 keyGeneratorMock.Object, 
@@ -57,7 +57,7 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
             var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {
@@ -78,7 +78,7 @@ namespace AccessTokenClient.Tests
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
-            var logger         = new NullLogger<AccessTokenClient>();
+            var logger         = new NullLogger<TokenClient>();
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
@@ -96,9 +96,9 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
-            IAccessTokenClient cachingDecorator = new TokenClientCachingDecorator(
+            ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
@@ -106,7 +106,7 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
             var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {
@@ -127,7 +127,7 @@ namespace AccessTokenClient.Tests
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
-            var logger         = new NullLogger<AccessTokenClient>();
+            var logger         = new NullLogger<TokenClient>();
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
@@ -145,7 +145,7 @@ namespace AccessTokenClient.Tests
             var mockCipherService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
-            var tokenClient = new AccessTokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
             var cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
@@ -155,7 +155,7 @@ namespace AccessTokenClient.Tests
                 mockCipherService.Object
             );
 
-            IAccessTokenClient validationDecorator = new ValidationDecorator(cachingDecorator);
+            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
             var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
             {

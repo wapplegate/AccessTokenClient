@@ -13,33 +13,33 @@ public void ConfigureServices(IServiceCollection services)
 
     services.AddMemoryCache();
 
-    services.AddTokenClient();
+    services.AddAccessTokenClient();
 }
 ```
 
-By default, the `AccessTokenClient` uses a memory cache to store tokens after they have been retrieved. You'll need to register an implementation of `IMemoryCache` using the `AddMemoryCache` service collection extension method or override the `ITokenResponseCache` interface used by the `AccessTokenClient` to provide your own caching implementation.
+By default, the `TokenClient` uses a memory cache to store tokens after they have been retrieved. You'll need to register an implementation of `IMemoryCache` using the `AddMemoryCache` service collection extension method or override the `ITokenResponseCache` interface used by the `TokenClient` to provide your own caching implementation.
 
-You can also configure the access token client options via the `AddTokenClient` method. You can specify whether to enable or disable caching as seen below:
+You can also configure the access token client options via the `AddAccessTokenClient` method. You can specify whether to enable or disable caching as seen below:
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
     services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
 
-    services.AddTokenClient(options => options.EnableCaching = false);
+    services.AddAccessTokenClient(options => options.EnableCaching = false);
 }
 ```
 
 ## Usage
 
-Once configured, you can then inject an instance of the `IAccessTokenClient` type into your controllers or services.
+Once configured, you can then inject an instance of the `ITokenClient` type into your controllers or services.
 
 ```csharp
 public class Service
 {
-    private readonly IAccessTokenClient client;
+    private readonly ITokenClient client;
 
-    public Service(IAccessTokenClient client)
+    public Service(ITokenClient client)
     {
         this.client = client;
     }
@@ -58,4 +58,4 @@ var tokenResponse = await client.RequestAccessToken(new TokenRequest
 });
 ```
 
-The `IAccessTokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the `client_credentials` grant from the specified endpoint using the supplied identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.
+The `ITokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the `client_credentials` grant from the specified endpoint using the supplied identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.

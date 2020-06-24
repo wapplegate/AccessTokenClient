@@ -10,14 +10,14 @@ namespace AccessTokenClient
     {
         private readonly ITokenEndpointOptions options;
 
-        private readonly IAccessTokenClient client;
+        private readonly ITokenClient client;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AccessTokenDelegatingHandler"/> class.
         /// </summary>
         /// <param name="options">The token endpoint options.</param>
         /// <param name="client">The access token client.</param>
-        public AccessTokenDelegatingHandler(ITokenEndpointOptions options, IAccessTokenClient client)
+        public AccessTokenDelegatingHandler(ITokenEndpointOptions options, ITokenClient client)
         {
             this.options = options ?? throw new ArgumentNullException(nameof(options));
             this.client  = client  ?? throw new ArgumentNullException(nameof(client));

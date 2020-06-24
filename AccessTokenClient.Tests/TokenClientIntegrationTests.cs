@@ -14,11 +14,11 @@ namespace AccessTokenClient.Tests
 
             services.AddMemoryCache();
 
-            services.AddTokenClient();
+            services.AddAccessTokenClient();
 
             var provider = services.BuildServiceProvider();
 
-            var client = provider.GetService<IAccessTokenClient>();
+            var client = provider.GetService<ITokenClient>();
 
             client.ShouldNotBeNull();
         }

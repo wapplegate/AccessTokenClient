@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
-    public class AccessTokenClient : IAccessTokenClient
+    public class TokenClient : ITokenClient
     {
-        private readonly ILogger<AccessTokenClient> logger;
+        private readonly ILogger<TokenClient> logger;
 
         private readonly HttpClient client;
 
         private readonly IResponseDeserializer deserializer;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AccessTokenClient"/> class.
+        /// Initializes a new instance of the <see cref="TokenClient"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="client">The http client.</param>
         /// <param name="deserializer">The response deserializer.</param>
-        public AccessTokenClient(ILogger<AccessTokenClient> logger, HttpClient client, IResponseDeserializer deserializer)
+        public TokenClient(ILogger<TokenClient> logger, HttpClient client, IResponseDeserializer deserializer)
         {
             this.logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
             this.client       = client       ?? throw new ArgumentNullException(nameof(client));
