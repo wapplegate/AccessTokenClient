@@ -59,7 +59,7 @@ namespace AccessTokenClient.Tests
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
-            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
+            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -108,7 +108,7 @@ namespace AccessTokenClient.Tests
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
-            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
+            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -157,7 +157,7 @@ namespace AccessTokenClient.Tests
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
 
-            var tokenResponse = await validationDecorator.GetAccessToken(new TokenRequest
+            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",

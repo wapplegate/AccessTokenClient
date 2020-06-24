@@ -25,7 +25,7 @@ namespace AccessTokenClient
 
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var result = await client.GetAccessToken(new TokenRequest
+            var result = await client.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = options.TokenEndpoint,
                 ClientIdentifier = options.ClientIdentifier,

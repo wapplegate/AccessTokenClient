@@ -13,6 +13,6 @@ namespace AccessTokenClient
         /// An optional function that can be passed in to override the method that executes the token request.
         /// </param>
         /// <returns>The token response.</returns>
-        Task<TokenResponse> GetAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null);
+        Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null);
     }
 }

@@ -18,7 +18,7 @@ namespace TestingTwoPointOneApplication.Controllers
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var result = await client.GetAccessToken(new TokenRequest());
+            var result = await client.RequestAccessToken(new TokenRequest());
 
             return Ok(result);
         }
