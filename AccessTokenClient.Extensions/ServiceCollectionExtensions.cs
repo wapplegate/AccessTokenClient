@@ -34,7 +34,7 @@ namespace AccessTokenClient.Extensions
             services.TryAddTransient<IEncryptionService, DefaultEncryptionService>();
             services.TryAddTransient<IResponseDeserializer, ResponseDeserializer>();
 
-            services.AddHttpClient<ITokenClient, TokenClient>();
+            services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
 
             if (options.EnableCaching)
             {
