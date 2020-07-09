@@ -1,4 +1,4 @@
-﻿using IdentityServer4.Quickstart.UI;
+﻿using IdentityServer.Quickstart;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -9,13 +9,10 @@ namespace IdentityServer
 {
     public class Startup
     {
-        public Startup(IWebHostEnvironment environment, IConfiguration configuration)
+        public Startup(IConfiguration configuration)
         {
-            Environment   = environment;
             Configuration = configuration;
         }
-
-        public IWebHostEnvironment Environment { get; }
 
         public IConfiguration Configuration { get; }
 
@@ -23,14 +20,12 @@ namespace IdentityServer
         {
             services.AddControllersWithViews();
 
-            // configures IIS out-of-proc settings (see https://github.com/aspnet/AspNetCore/issues/14882)
             services.Configure<IISOptions>(iis =>
             {
                 iis.AuthenticationDisplayName = "Windows";
                 iis.AutomaticAuthentication   = false;
             });
 
-            // configures IIS in-proc settings
             services.Configure<IISServerOptions>(iis =>
             {
                 iis.AuthenticationDisplayName = "Windows";
@@ -44,27 +39,19 @@ namespace IdentityServer
                 options.Events.RaiseFailureEvents     = true;
                 options.Events.RaiseSuccessEvents     = true;
             })
-            .AddTestUsers(TestUsers.Users);
+            .AddTestUsers(TestUsers.Users)
+            .AddInMemoryIdentityResources(Config.Ids)
+            .AddInMemoryApiResources(Config.Apis)
+            .AddInMemoryClients(Config.Clients);
 
-            // in-memory, code config
-            builder.AddInMemoryIdentityResources(Config.Ids);
-            builder.AddInMemoryApiResources(Config.Apis);
-            builder.AddInMemoryClients(Config.Clients);
-
-            // or in-memory, json config
-            //builder.AddInMemoryIdentityResources(Configuration.GetSection("IdentityResources"));
-            //builder.AddInMemoryApiResources(Configuration.GetSection("ApiResources"));
-            //builder.AddInMemoryClients(Configuration.GetSection("clients"));
-
-            // not recommended for production - you need to store your key material somewhere secure
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
         }
 
-        public void Configure(IApplicationBuilder app)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
         {
-            if (Environment.IsDevelopment())
+            if (environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }

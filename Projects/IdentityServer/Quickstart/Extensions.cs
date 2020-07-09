@@ -1,8 +1,9 @@
-using System.Threading.Tasks;
+using IdentityServer.Quickstart.Account;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
-namespace IdentityServer4.Quickstart.UI
+namespace IdentityServer.Quickstart
 {
     public static class Extensions
     {
