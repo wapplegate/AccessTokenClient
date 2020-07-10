@@ -2,6 +2,9 @@
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// This static class contains methods used to validate token requests.
+    /// </summary>
     public static class TokenRequestValidator
     {
         /// <summary>

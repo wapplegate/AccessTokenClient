@@ -2,6 +2,11 @@
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// This static class contains an extension method that adds the <see cref="AccessTokenDelegatingHandler"/>
+    /// handler to the <see cref="IHttpClientBuilder"/> instance in order to initiate automatic client credentials
+    /// token requests for the registered client.
+    /// </summary>
     public static class HttpClientBuilderExtensions
     {
         /// <summary>
