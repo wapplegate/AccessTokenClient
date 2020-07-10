@@ -1,5 +1,7 @@
 [![Build Status](https://dev.azure.com/bill-applegate/AccessTokenClient/_apis/build/status/wapplegate.AccessTokenClient?branchName=development)](https://dev.azure.com/bill-applegate/AccessTokenClient/_build/latest?definitionId=4&branchName=development)
 
+![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/bill-applegate/AccessTokenClient/4)
+
 ## About
 
 This library provides an access token client that can be used when you need to make `client_credentials` OAuth requests. Instead of re-writing the same access token clients over and over again in your services, you can use this package to make those token requests easily. The package also includes the ability to cache access tokens in memory so they can be reused.
