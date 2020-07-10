@@ -7,6 +7,7 @@ using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -44,7 +45,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockCipherService = new Mock<IEncryptionService>();
+            var mockEncryptionService = new Mock<IEncryptionService>();
 
             // Set-up the access token client, token client, and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -54,7 +55,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object, 
                 keyGeneratorMock.Object, 
                 calculatorMock.Object, 
-                mockCipherService.Object
+                mockEncryptionService.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
@@ -93,7 +94,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockCipherService = new Mock<IEncryptionService>();
+            var mockEncryptionService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -103,7 +104,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
                 calculatorMock.Object,
-                mockCipherService.Object
+                mockEncryptionService.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
@@ -142,7 +143,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockCipherService = new Mock<IEncryptionService>();
+            var mockEncryptionService = new Mock<IEncryptionService>();
 
             // Set-up the token client and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -152,7 +153,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object,
                 keyGeneratorMock.Object,
                 calculatorMock.Object,
-                mockCipherService.Object
+                mockEncryptionService.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
@@ -168,6 +169,33 @@ namespace AccessTokenClient.Tests
 
             messageHandler.NumberOfCalls.ShouldNotBeNull();
             messageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenTokenResponseIsInvalid()
+        {
+            const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            // Set-up the key generator mock:
+            var keyGeneratorMock = new Mock<IKeyGenerator>();
+            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
+
+            // Set-up the access token client, token client, and the caching decorator:
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.test.com",
+                ClientIdentifier = "123",
+                ClientSecret     = "456",
+                Scopes           = new[] { "esp" }
+            });
+
+            function.Should().Throw<Exception>();
         }
     }
 }
