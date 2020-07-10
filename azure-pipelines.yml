@@ -10,24 +10,29 @@ variables:
 
 steps:
   - task: UseDotNet@2
+    displayName: "select sdk"
     inputs:
       packageType: "sdk"
       version: "3.1.300"
   - task: DotNetCoreCLI@2
+    displayName: "dotnet restore"
     inputs:
       command: "restore"
       feedsToUse: "select"
   - task: DotNetCoreCLI@2
+    displayName: "dotnet build"
     inputs:
       command: "build"
       arguments: "--configuration $(buildConfiguration)"
       projects: "**/*.csproj"
   - task: DotNetCoreCLI@2
+    displayName: "dotnet test"
     inputs:
       command: "test"
       arguments: "/p:CollectCoverage=true"
       projects: "**/*.csproj"
   - task: DotNetCoreCLI@2
+    displayName: "dotnet pack"
     inputs:
       command: 'pack'
       packagesToPack: '**/*.csproj'
@@ -36,6 +41,7 @@ steps:
       minorVersion: '0'
       patchVersion: '0'
   - task: NuGetCommand@2
+    displayName: "nuget push"
     inputs:
       command: 'push'
       packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
