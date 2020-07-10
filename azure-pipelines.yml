@@ -25,6 +25,7 @@ steps:
   - task: DotNetCoreCLI@2
     inputs:
       command: "test"
+      arguments: "/p:CollectCoverage=true"
       projects: "**/*.csproj"
   - task: DotNetCoreCLI@2
     inputs:
