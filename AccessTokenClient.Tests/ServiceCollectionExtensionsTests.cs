@@ -1,12 +1,25 @@
 ﻿using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
+using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using Xunit;
 
 namespace AccessTokenClient.Tests
 {
-    public class TokenClientIntegrationTests
+    public class ServiceCollectionExtensionsTests
     {
+        [Fact]
+        public void EnsureExceptionThrownIfServiceCollectionIsNull()
+        {
+            IServiceCollection services = null;
+
+            // ReSharper disable once ExpressionIsAlwaysNull
+            Action action = () => services.AddAccessTokenClient();
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
         [Fact]
         public void EnsureServiceProviderReturnsTokenClient()
         {
