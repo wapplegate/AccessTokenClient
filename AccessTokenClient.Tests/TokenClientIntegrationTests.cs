@@ -22,5 +22,21 @@ namespace AccessTokenClient.Tests
 
             client.ShouldNotBeNull();
         }
+
+        [Fact]
+        public void EnsureServiceProviderReturnsTokenClientWhenCachingDisabled()
+        {
+            var services = new ServiceCollection();
+
+            services.AddMemoryCache();
+
+            services.AddAccessTokenClient(x => x.EnableCaching = false);
+
+            var provider = services.BuildServiceProvider();
+
+            var client = provider.GetService<ITokenClient>();
+
+            client.ShouldNotBeNull();
+        }
     }
 }
