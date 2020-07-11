@@ -65,7 +65,7 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
                 ClientSecret     = "456",
-                Scopes           = new[] {"esp"}
+                Scopes           = new[] {"scope:read"}
             });
 
             tokenResponse.ShouldNotBeNull();
@@ -172,7 +172,7 @@ namespace AccessTokenClient.Tests
         }
 
         [Fact]
-        public void EnsureExceptionThrownWhenTokenResponseIsInvalid()
+        public void EnsureExceptionThrownWhenAccessTokenIsEmpty()
         {
             const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
 
@@ -180,11 +180,6 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient = new HttpClient(messageHandler);
 
-            // Set-up the key generator mock:
-            var keyGeneratorMock = new Mock<IKeyGenerator>();
-            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
-
-            // Set-up the access token client, token client, and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
@@ -192,7 +187,32 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
                 ClientSecret     = "456",
-                Scopes           = new[] { "esp" }
+                Scopes           = new[] { "scope:read" }
+            });
+
+            function.Should().Throw<Exception>();
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenTokenResponseIsNull()
+        {
+            const string Response = "";
+
+            var logger         = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+            var httpClient     = new HttpClient(messageHandler);
+
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
+
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.test.com",
+                ClientIdentifier = "123",
+                ClientSecret     = "456",
+                Scopes           = new[] { "scope:read" }
             });
 
             function.Should().Throw<Exception>();

@@ -7,7 +7,7 @@ using Xunit;
 
 namespace AccessTokenClient.Tests
 {
-    public class ValidationDecoratorTests
+    public class TokenClientValidationDecoratorTests
     {
         [Theory]
         [InlineData(null)]
