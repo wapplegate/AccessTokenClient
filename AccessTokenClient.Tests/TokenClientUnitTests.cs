@@ -114,7 +114,7 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
                 ClientSecret     = "456",
-                Scopes           = new[] {"testing"}
+                Scopes           = new[] {"scope:read"}
             });
 
             tokenResponse.ShouldNotBeNull();

@@ -34,6 +34,7 @@ namespace AccessTokenClient.Tests
             var client = provider.GetService<ITokenClient>();
 
             client.ShouldNotBeNull();
+            client.Should().BeOfType<TokenClientValidationDecorator>();
         }
 
         [Fact]
@@ -50,6 +51,7 @@ namespace AccessTokenClient.Tests
             var client = provider.GetService<ITokenClient>();
 
             client.ShouldNotBeNull();
+            client.Should().BeOfType<TokenClientValidationDecorator>();
         }
     }
 }
