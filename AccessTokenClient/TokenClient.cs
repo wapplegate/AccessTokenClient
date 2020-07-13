@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// This class contains a method that requests an access token from a
+    /// specified token endpoint using the client credentials oauth flow.
+    /// </summary>
     public class TokenClient : ITokenClient
     {
         private readonly ILogger<TokenClient> logger;

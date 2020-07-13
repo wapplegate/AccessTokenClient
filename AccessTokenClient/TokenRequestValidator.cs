@@ -2,6 +2,9 @@
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// This static class contains methods used to validate token requests.
+    /// </summary>
     public static class TokenRequestValidator
     {
         /// <summary>
@@ -14,17 +17,17 @@ namespace AccessTokenClient
         {
             if (string.IsNullOrWhiteSpace(request.TokenEndpoint))
             {
-                throw new Exception("A token endpoint has not been specified.");
+                throw new ArgumentNullException(nameof(request.TokenEndpoint));
             }
 
             if (string.IsNullOrWhiteSpace(request.ClientIdentifier))
             {
-                throw new Exception("A client identifier has not been specified.");
+                throw new ArgumentNullException(nameof(request.ClientIdentifier));
             }
 
             if (string.IsNullOrWhiteSpace(request.ClientSecret))
             {
-                throw new Exception("A client secret has not been specified.");
+                throw new ArgumentNullException(nameof(request.ClientSecret));
             }
         }
     }

@@ -6,6 +6,10 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// Delegating handler that automatically requests an access
+    /// token and adds an authorization header to the outgoing request.
+    /// </summary>
     public class AccessTokenDelegatingHandler : DelegatingHandler
     {
         private readonly ITokenEndpointOptions options;
@@ -23,6 +27,12 @@ namespace AccessTokenClient
             this.client  = client  ?? throw new ArgumentNullException(nameof(client));
         }
 
+        /// <summary>
+        /// Requests an access token and adds an authorization header to the outgoing the request if successful.
+        /// </summary>
+        /// <param name="request">The http request message.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
+        /// <returns>The <see cref="HttpResponseMessage"/>.</returns>
         protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
             var result = await client.RequestAccessToken(new TokenRequest

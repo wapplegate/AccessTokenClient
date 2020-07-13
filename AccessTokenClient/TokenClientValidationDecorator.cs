@@ -3,31 +3,31 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// Decorator that ensures the <see cref="TokenRequest"/> is valid.
+    /// </summary>
     public class TokenClientValidationDecorator : ITokenClient
     {
         private readonly ITokenClient decoratedClient;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TokenClientValidationDecorator"/> class.
+        /// </summary>
+        /// <param name="decoratedClient">The decorated token client.</param>
         public TokenClientValidationDecorator(ITokenClient decoratedClient)
         {
             this.decoratedClient = decoratedClient;
         }
 
+        /// <summary>
+        /// Validates the token request is valid.
+        /// </summary>
+        /// <param name="request">The token request.</param>
+        /// <param name="execute">A function to override the access token request process.</param>
+        /// <returns>The <see cref="TokenResponse"/>.</returns>
         public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
-            if (string.IsNullOrWhiteSpace(request.TokenEndpoint))
-            {
-                throw new Exception("A token endpoint has not been specified.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.ClientIdentifier))
-            {
-                throw new Exception("A client identifier has not been specified.");
-            }
-
-            if (string.IsNullOrWhiteSpace(request.ClientSecret))
-            {
-                throw new Exception("A client secret has not been specified.");
-            }
+            TokenRequestValidator.EnsureRequestIsValid(request);
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 

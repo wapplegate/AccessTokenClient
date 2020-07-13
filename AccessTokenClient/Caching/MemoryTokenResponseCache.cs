@@ -4,6 +4,10 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
 {
+    /// <summary>
+    /// This class is used to store token responses in a memory
+    /// cache where they can be retrieved and reused quickly.
+    /// </summary>
     public class MemoryTokenResponseCache : ITokenResponseCache
     {
         private readonly IMemoryCache cache;
@@ -23,7 +27,7 @@ namespace AccessTokenClient.Caching
         /// <inheritdoc />
         public Task<TokenGetResult<TokenResponse>> Get(string key)
         {
-            var exists = cache.TryGetValue<TokenResponse>(key, out var cacheItem);
+            var exists = cache.TryGetValue<TokenResponse>(key, out var cachedTokenResponse);
 
             if (!exists)
             {
@@ -37,7 +41,7 @@ namespace AccessTokenClient.Caching
             var result = new TokenGetResult<TokenResponse>
             {
                 Successful = true,
-                Value      = cacheItem
+                Value      = cachedTokenResponse
             };
 
             return Task.FromResult(result);

@@ -5,6 +5,10 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient.Extensions
 {
+    /// <summary>
+    /// This static class provides extension methods for the http client
+    /// in order to make client credentials access token requests.
+    /// </summary>
     public static class HttpClientExtensions
     {
         /// <summary>
@@ -15,10 +19,7 @@ namespace AccessTokenClient.Extensions
         /// <returns>The token response.</returns>
         public static async Task<string> ExecuteClientCredentialsTokenRequest(this HttpClient client, TokenRequest request)
         {
-            if (string.IsNullOrEmpty(request.TokenEndpoint))
-            {
-                throw new ArgumentNullException(nameof(request.TokenEndpoint));
-            }
+            TokenRequestValidator.EnsureRequestIsValid(request);
 
             var uri = new Uri(request.TokenEndpoint);
 

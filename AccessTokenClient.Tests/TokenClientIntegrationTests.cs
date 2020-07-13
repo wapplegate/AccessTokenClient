@@ -1,26 +1,34 @@
 ﻿using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace AccessTokenClient.Tests
 {
     public class TokenClientIntegrationTests
     {
-        [Fact]
-        public void EnsureServiceProviderReturnsTokenClient()
+        [Fact(Skip = "Skipping")]
+        public async Task EnsureClientCredentialsRequestSuccessful()
         {
             var services = new ServiceCollection();
 
-            services.AddMemoryCache();
-
-            services.AddAccessTokenClient();
+            services.AddMemoryCache().AddAccessTokenClient(x => x.EnableCaching = false);
 
             var provider = services.BuildServiceProvider();
 
-            var client = provider.GetService<ITokenClient>();
+            var tokenClient = provider.GetService<ITokenClient>();
 
-            client.ShouldNotBeNull();
+            var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                ClientIdentifier = "",
+                ClientSecret     = "",
+                Scopes           = new[] { "" },
+                TokenEndpoint    = ""
+            });
+
+            tokenResponse.ShouldNotBeNull();
+            tokenResponse.AccessToken.ShouldNotBeNull();
         }
     }
 }

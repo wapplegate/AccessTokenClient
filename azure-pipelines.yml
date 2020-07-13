@@ -10,19 +10,45 @@ variables:
 
 steps:
   - task: UseDotNet@2
+    displayName: "SDK"
     inputs:
       packageType: "sdk"
       version: "3.1.300"
   - task: DotNetCoreCLI@2
+    displayName: "Restore"
     inputs:
       command: "restore"
       feedsToUse: "select"
   - task: DotNetCoreCLI@2
+    displayName: "Build"
     inputs:
       command: "build"
       arguments: "--configuration $(buildConfiguration)"
       projects: "**/*.csproj"
   - task: DotNetCoreCLI@2
+    displayName: "Test"
     inputs:
       command: "test"
+      arguments: "--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
       projects: "**/*.csproj"
+  - task: PublishCodeCoverageResults@1
+    displayName: "Publish Coverage"
+    inputs:
+      codeCoverageTool: 'Cobertura'
+      summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+  - task: DotNetCoreCLI@2
+    displayName: "Pack"
+    inputs:
+      command: 'pack'
+      packagesToPack: '**/*.csproj'
+      versioningScheme: 'byPrereleaseNumber'
+      majorVersion: '1'
+      minorVersion: '0'
+      patchVersion: '0'
+  - task: NuGetCommand@2
+    displayName: "Push"
+    inputs:
+      command: 'push'
+      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
+      nuGetFeedType: 'internal'
+      publishVstsFeed: '9566de23-5df9-4be2-b676-8ac0e1cbd609/45a7e446-1e14-44f0-a847-4c60611a0413'

@@ -1,10 +1,4 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+using IdentityServer.Quickstart.Consent;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -13,8 +7,11 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 
-namespace IdentityServer4.Quickstart.UI.Device
+namespace IdentityServer.Quickstart.Device
 {
     [Authorize]
     [SecurityHeaders]
@@ -43,10 +40,17 @@ namespace IdentityServer4.Quickstart.UI.Device
         [HttpGet]
         public async Task<IActionResult> Index([FromQuery(Name = "user_code")] string userCode)
         {
-            if (string.IsNullOrWhiteSpace(userCode)) return View("UserCodeCapture");
+            if (string.IsNullOrWhiteSpace(userCode))
+            {
+                return View("UserCodeCapture");
+            }
 
             var vm = await BuildViewModelAsync(userCode);
-            if (vm == null) return View("Error");
+
+            if (vm == null)
+            {
+                return View("Error");
+            }
 
             vm.ConfirmUserCode = true;
             return View("UserCodeConfirmation", vm);
@@ -57,7 +61,11 @@ namespace IdentityServer4.Quickstart.UI.Device
         public async Task<IActionResult> UserCodeCapture(string userCode)
         {
             var vm = await BuildViewModelAsync(userCode);
-            if (vm == null) return View("Error");
+
+            if (vm == null)
+            {
+                return View("Error");
+            }
 
             return View("UserCodeConfirmation", vm);
         }
@@ -66,10 +74,17 @@ namespace IdentityServer4.Quickstart.UI.Device
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Callback(DeviceAuthorizationInputModel model)
         {
-            if (model == null) throw new ArgumentNullException(nameof(model));
+            if (model == null)
+            {
+                throw new ArgumentNullException(nameof(model));
+            }
 
             var result = await ProcessConsent(model);
-            if (result.HasValidationError) return View("Error");
+
+            if (result.HasValidationError)
+            {
+                return View("Error");
+            }
 
             return View("Success");
         }
@@ -79,22 +94,25 @@ namespace IdentityServer4.Quickstart.UI.Device
             var result = new ProcessConsentResult();
 
             var request = await _interaction.GetAuthorizationContextAsync(model.UserCode);
-            if (request == null) return result;
+
+            if (request == null)
+            {
+                return result;
+            }
 
             ConsentResponse grantedConsent = null;
 
-            // user clicked 'no' - send back the standard 'access_denied' response
+            // The user clicked 'no' - send back the standard 'access_denied' response
             if (model.Button == "no")
             {
                 grantedConsent = ConsentResponse.Denied;
 
-                // emit event
                 await _events.RaiseAsync(new ConsentDeniedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested));
             }
-            // user clicked 'yes' - validate the data
+            // The user clicked 'yes' - validate the data
             else if (model.Button == "yes")
             {
-                // if the user consented to some scope, build the response model
+                // If the user consented to some scope, build the response model
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
                 {
                     var scopes = model.ScopesConsented;
@@ -109,7 +127,6 @@ namespace IdentityServer4.Quickstart.UI.Device
                         ScopesConsented = scopes.ToArray()
                     };
 
-                    // emit event
                     await _events.RaiseAsync(new ConsentGrantedEvent(User.GetSubjectId(), request.ClientId, request.ScopesRequested, grantedConsent.ScopesConsented, grantedConsent.RememberConsent));
                 }
                 else
@@ -143,20 +160,20 @@ namespace IdentityServer4.Quickstart.UI.Device
         private async Task<DeviceAuthorizationViewModel> BuildViewModelAsync(string userCode, DeviceAuthorizationInputModel model = null)
         {
             var request = await _interaction.GetAuthorizationContextAsync(userCode);
+
             if (request != null)
             {
                 var client = await _clientStore.FindEnabledClientByIdAsync(request.ClientId);
                 if (client != null)
                 {
                     var resources = await _resourceStore.FindEnabledResourcesByScopeAsync(request.ScopesRequested);
+
                     if (resources != null && (resources.IdentityResources.Any() || resources.ApiResources.Any()))
                     {
                         return CreateConsentViewModel(userCode, model, client, resources);
                     }
-                    else
-                    {
-                        _logger.LogError("No scopes matching: {0}", request.ScopesRequested.Aggregate((x, y) => x + ", " + y));
-                    }
+
+                    _logger.LogError("No scopes matching: {0}", request.ScopesRequested.Aggregate((x, y) => x + ", " + y));
                 }
                 else
                 {
@@ -195,7 +212,7 @@ namespace IdentityServer4.Quickstart.UI.Device
             return vm;
         }
 
-        private ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
+        private static ScopeViewModel CreateScopeViewModel(IdentityResource identity, bool check)
         {
             return new ScopeViewModel
             {

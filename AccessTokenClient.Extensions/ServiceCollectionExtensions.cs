@@ -9,6 +9,10 @@ using System;
 
 namespace AccessTokenClient.Extensions
 {
+    /// <summary>
+    /// This static class contains an extension method used to add the
+    /// <see cref="ITokenClient"/> and dependencies to the service collection.
+    /// </summary>
     public static class ServiceCollectionExtensions
     {
         /// <summary>
