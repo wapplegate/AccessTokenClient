@@ -13,8 +13,6 @@ In order to begin using the token client, you first need to install two packages
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
     services.AddMemoryCache();
 
     services.AddAccessTokenClient();
@@ -28,8 +26,6 @@ You can also configure the access token client options via the `AddAccessTokenCl
 ```csharp
 public void ConfigureServices(IServiceCollection services)
 {
-    services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
-
     services.AddAccessTokenClient(options => options.EnableCaching = false);
 }
 ```
