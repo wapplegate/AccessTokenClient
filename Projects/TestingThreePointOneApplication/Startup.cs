@@ -22,7 +22,10 @@ namespace TestingThreePointOneApplication
         {
             services.AddMemoryCache();
 
-            services.AddAccessTokenClient();
+            services.AddAccessTokenClient(builderAction: builder =>
+            {
+                builder.AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy());
+            });
 
             // Register the options for the client:
             services.AddSingleton(new TestingClientOptions
@@ -34,7 +37,9 @@ namespace TestingThreePointOneApplication
             });
 
             // Register the client and specify that the access token delegating handler be used:
-            services.AddHttpClient<ITestingClient, TestingClient>().AddClientAccessTokenHandler<TestingClientOptions>();
+            services
+                .AddHttpClient<ITestingClient, TestingClient>()
+                .AddClientAccessTokenHandler<TestingClientOptions>();
 
             services.AddControllers();
         }
