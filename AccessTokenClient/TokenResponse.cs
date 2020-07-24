@@ -2,6 +2,9 @@
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// A class that represents the response from a token endpoint.
+    /// </summary>
     public class TokenResponse
     {
         /// <summary>
