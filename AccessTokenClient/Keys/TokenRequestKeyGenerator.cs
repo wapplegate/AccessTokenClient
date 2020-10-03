@@ -5,6 +5,9 @@ using System.Text;
 
 namespace AccessTokenClient.Keys
 {
+    /// <summary>
+    /// A key generator that returns a hash of the <see cref="TokenRequest"/>.
+    /// </summary>
     public class TokenRequestKeyGenerator : IKeyGenerator
     {
         /// <inheritdoc />

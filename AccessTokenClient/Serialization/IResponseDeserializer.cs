@@ -1,5 +1,8 @@
 ﻿namespace AccessTokenClient.Serialization
 {
+    /// <summary>
+    /// Represents a deserializer that converts a <see cref="string"/> to a <see cref="TokenResponse"/>.
+    /// </summary>
     public interface IResponseDeserializer
     {
         /// <summary>

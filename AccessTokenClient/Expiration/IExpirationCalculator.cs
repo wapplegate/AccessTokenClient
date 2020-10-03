@@ -1,5 +1,8 @@
 ﻿namespace AccessTokenClient.Expiration
 {
+    /// <summary>
+    /// Represents a calculator that calculates the minutes until the access token expires.
+    /// </summary>
     public interface IExpirationCalculator
     {
         /// <summary>

@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
 {
+    /// <summary>
+    /// Represents a token response cache that allows for the storage and retrieval of the <see cref="TokenResponse"/>.
+    /// </summary>
     public interface ITokenResponseCache
     {
         /// <summary>

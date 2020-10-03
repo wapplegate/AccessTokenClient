@@ -30,7 +30,10 @@ namespace AccessTokenClient.Tests.Helpers
         {
             NumberOfCalls++;
 
-            Input = await request.Content.ReadAsStringAsync();
+            if (request.Content != null)
+            {
+                Input = await request.Content.ReadAsStringAsync(cancellationToken);
+            }
 
             return new HttpResponseMessage
             {

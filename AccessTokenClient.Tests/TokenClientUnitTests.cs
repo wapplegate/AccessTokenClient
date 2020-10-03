@@ -1,9 +1,9 @@
 using AccessTokenClient.Caching;
-using AccessTokenClient.Encryption;
 using AccessTokenClient.Expiration;
 using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
 using AccessTokenClient.Tests.Helpers;
+using AccessTokenClient.Transformation;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -45,7 +45,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockEncryptionService = new Mock<IEncryptionService>();
+            var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the access token client, token client, and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -55,7 +55,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object, 
                 keyGeneratorMock.Object, 
                 calculatorMock.Object, 
-                mockEncryptionService.Object
+                mockTransformer.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
@@ -94,7 +94,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockEncryptionService = new Mock<IEncryptionService>();
+            var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -104,7 +104,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
                 calculatorMock.Object,
-                mockEncryptionService.Object
+                mockTransformer.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
@@ -143,7 +143,7 @@ namespace AccessTokenClient.Tests
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
-            var mockEncryptionService = new Mock<IEncryptionService>();
+            var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
@@ -153,7 +153,7 @@ namespace AccessTokenClient.Tests
                 cacheMock.Object,
                 keyGeneratorMock.Object,
                 calculatorMock.Object,
-                mockEncryptionService.Object
+                mockTransformer.Object
             );
 
             ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
