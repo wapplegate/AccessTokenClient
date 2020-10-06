@@ -40,10 +40,6 @@ namespace AccessTokenClient.Extensions
 
             action?.Invoke(options);
 
-            services.TryAddSingleton<IExpirationCalculator, DefaultExpirationCalculator>();
-            services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
-            services.TryAddSingleton<ITokenResponseCache, MemoryTokenResponseCache>();
-            services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
             services.TryAddSingleton<IResponseDeserializer, ResponseDeserializer>();
 
             var httpClientBuilder = services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
@@ -52,6 +48,10 @@ namespace AccessTokenClient.Extensions
 
             if (options.EnableCaching)
             {
+                services.TryAddSingleton<IExpirationCalculator, DefaultExpirationCalculator>();
+                services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
+                services.TryAddSingleton<ITokenResponseCache, MemoryTokenResponseCache>();
+                services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
                 services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
             }
 

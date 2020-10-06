@@ -44,7 +44,7 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
+            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the access token client, token client, and the caching decorator:
@@ -93,7 +93,7 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
+            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:
@@ -142,7 +142,7 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key calculator mock:
             var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(10);
+            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:

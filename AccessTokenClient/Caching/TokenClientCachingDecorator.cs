@@ -64,13 +64,22 @@ namespace AccessTokenClient.Caching
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 
-            var expiration = calculator.CalculateExpiration(tokenResponse);
+            await CacheTokenResponse(key, tokenResponse);
+
+            return tokenResponse;
+        }
+
+        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse)
+        {
+            var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
+
+            var accessTokenValue = tokenResponse.AccessToken;
 
             tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
 
-            await cache.Set(key, tokenResponse, TimeSpan.FromMinutes(expiration));
+            await cache.Set(key, tokenResponse, expirationTimeSpan);
 
-            return tokenResponse;
+            tokenResponse.AccessToken = accessTokenValue;
         }
     }
 }
