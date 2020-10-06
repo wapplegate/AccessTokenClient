@@ -39,7 +39,7 @@ namespace AccessTokenClient.Extensions
 
             if (!responseMessage.IsSuccessStatusCode)
             {
-                throw new Exception("The request to the token endpoint was unsuccessful.");
+                throw new UnsuccessfulTokenResponseException("The request to the token endpoint was unsuccessful.");
             }
 
             return await responseMessage.Content.ReadAsStringAsync();

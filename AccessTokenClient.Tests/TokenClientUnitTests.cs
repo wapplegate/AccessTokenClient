@@ -172,7 +172,7 @@ namespace AccessTokenClient.Tests
         }
 
         [Fact]
-        public void EnsureExceptionThrownWhenAccessTokenIsEmpty()
+        public async Task EnsureExceptionThrownWhenAccessTokenIsEmpty()
         {
             const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
 
@@ -190,20 +190,17 @@ namespace AccessTokenClient.Tests
                 Scopes           = new[] { "scope:read" }
             });
 
-            function.Should().Throw<Exception>();
+            await function.Should().ThrowAsync<Exception>();
         }
 
         [Fact]
-        public void EnsureExceptionThrownWhenTokenResponseIsNull()
+        public async Task EnsureExceptionThrownWhenTokenResponseIsEmpty()
         {
             const string Response = "";
 
             var logger         = new NullLogger<TokenClient>();
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
-
-            var mockDeserializer = new Mock<IResponseDeserializer>();
-            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
 
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
@@ -215,7 +212,131 @@ namespace AccessTokenClient.Tests
                 Scopes           = new[] { "scope:read" }
             });
 
-            function.Should().Throw<Exception>();
+            await function.Should().ThrowAsync<Exception>();
+        }
+
+
+        [Fact]
+        public async Task Ensure()
+        {
+            const string Response = "";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.NotFound);
+            var httpClient = new HttpClient(messageHandler);
+
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.test.com",
+                ClientIdentifier = "123",
+                ClientSecret     = "456",
+                Scopes           = new[] { "scope:read" }
+            });
+
+            await function.Should().ThrowAsync<UnsuccessfulTokenResponseException>();
+        }
+
+        [Fact]
+        public async Task EnsureExceptionThrownWhenTokenResponseIsNull()
+        {
+            const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
+
+            var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.test.com",
+                ClientIdentifier = "123",
+                ClientSecret     = "456",
+                Scopes           = new[] { "scope:read" }
+            });
+
+            await function.Should().ThrowAsync<InvalidTokenResponseException>();
+        }
+
+        [Fact]
+        public async Task EnsureExceptionThrownWhenTokenResponseAccessTokenIsEmpty()
+        {
+            const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)new TokenResponse
+            {
+                AccessToken = "",
+                ExpiresIn   = 3000,
+                TokenType   = "type"
+            });
+
+            var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.test.com",
+                ClientIdentifier = "123",
+                ClientSecret     = "456",
+                Scopes           = new[] { "scope:read" }
+            });
+
+            await function.Should().ThrowAsync<InvalidTokenResponseException>();
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenLoggerIsNull()
+        {
+            var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
+
+            Action action = () =>
+            {
+                var tokenClient = new TokenClient(null, httpClient, new ResponseDeserializer());
+            };
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenClientIsNull()
+        {
+            var logger = new NullLogger<TokenClient>();
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
+
+            Action action = () =>
+            {
+                var tokenClient = new TokenClient(logger, null, new ResponseDeserializer());
+            };
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenDeserializerIsNull()
+        {
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            Action action = () =>
+            {
+                var tokenClient = new TokenClient(logger, httpClient, null);
+            };
+
+            action.Should().Throw<ArgumentNullException>();
         }
     }
 }

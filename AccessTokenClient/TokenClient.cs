@@ -51,7 +51,7 @@ namespace AccessTokenClient
 
             logger.LogError("An invalid token response was returned from token endpoint '{Endpoint}'.", request.TokenEndpoint);
 
-            throw new Exception($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
+            throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
         }
 
         private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute)
