@@ -1,8 +1,8 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Encryption;
 using AccessTokenClient.Expiration;
 using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
+using AccessTokenClient.Transformation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -40,11 +40,7 @@ namespace AccessTokenClient.Extensions
 
             action?.Invoke(options);
 
-            services.TryAddTransient<IExpirationCalculator, DefaultExpirationCalculator>();
-            services.TryAddTransient<IKeyGenerator, TokenRequestKeyGenerator>();
-            services.TryAddTransient<ITokenResponseCache, MemoryTokenResponseCache>();
-            services.TryAddTransient<IEncryptionService, DefaultEncryptionService>();
-            services.TryAddTransient<IResponseDeserializer, ResponseDeserializer>();
+            services.TryAddSingleton<IResponseDeserializer, ResponseDeserializer>();
 
             var httpClientBuilder = services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
 
@@ -52,6 +48,10 @@ namespace AccessTokenClient.Extensions
 
             if (options.EnableCaching)
             {
+                services.TryAddSingleton<IExpirationCalculator, DefaultExpirationCalculator>();
+                services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
+                services.TryAddSingleton<ITokenResponseCache, MemoryTokenResponseCache>();
+                services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
                 services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
             }
 

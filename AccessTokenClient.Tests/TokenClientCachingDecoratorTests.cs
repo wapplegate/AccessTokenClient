@@ -1,8 +1,8 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Encryption;
 using AccessTokenClient.Expiration;
 using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
+using AccessTokenClient.Transformation;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -22,7 +22,7 @@ namespace AccessTokenClient.Tests
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
                 new DefaultExpirationCalculator(),
-                new DefaultEncryptionService());
+                new DefaultAccessTokenTransformer());
 
             creationAction.Should().Throw<ArgumentNullException>();
         }
@@ -35,7 +35,7 @@ namespace AccessTokenClient.Tests
                 null,
                 new TokenRequestKeyGenerator(),
                 new DefaultExpirationCalculator(),
-                new DefaultEncryptionService());
+                new DefaultAccessTokenTransformer());
 
             creationAction.Should().Throw<ArgumentNullException>();
         }
@@ -48,7 +48,7 @@ namespace AccessTokenClient.Tests
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 null,
                 new DefaultExpirationCalculator(),
-                new DefaultEncryptionService());
+                new DefaultAccessTokenTransformer());
 
             creationAction.Should().Throw<ArgumentNullException>();
         }
@@ -61,13 +61,13 @@ namespace AccessTokenClient.Tests
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
                 null,
-                new DefaultEncryptionService());
+                new DefaultAccessTokenTransformer());
 
             creationAction.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
-        public void EnsureExceptionThrownWhenEncryptionServiceIsNull()
+        public void EnsureExceptionThrownWhenTransformerIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
                 new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),

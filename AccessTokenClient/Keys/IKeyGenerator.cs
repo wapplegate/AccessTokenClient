@@ -1,5 +1,8 @@
 ﻿namespace AccessTokenClient.Keys
 {
+    /// <summary>
+    /// Represents a key generator that generates a cache key from a <see cref="TokenRequest"/>.
+    /// </summary>
     public interface IKeyGenerator
     {
         /// <summary>

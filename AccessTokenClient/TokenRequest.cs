@@ -1,5 +1,9 @@
 ﻿namespace AccessTokenClient
 {
+    /// <summary>
+    /// This class encapsulates the parameters that are
+    /// necessary to make a client credentials token request. 
+    /// </summary>
     public class TokenRequest
     {
         /// <summary>

@@ -1,5 +1,9 @@
 ﻿namespace AccessTokenClient.Caching
 {
+    /// <summary>
+    /// A wrapper class that indicates whether the <see cref="TokenResponse"/> was retrieved successfully from cache.
+    /// </summary>
+    /// <typeparam name="T">The value type.</typeparam>
     public class TokenGetResult<T>
     {
         /// <summary>

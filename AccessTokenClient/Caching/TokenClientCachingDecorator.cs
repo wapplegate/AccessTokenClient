@@ -1,6 +1,6 @@
-﻿using AccessTokenClient.Encryption;
-using AccessTokenClient.Expiration;
+﻿using AccessTokenClient.Expiration;
 using AccessTokenClient.Keys;
+using AccessTokenClient.Transformation;
 using System;
 using System.Threading.Tasks;
 
@@ -21,7 +21,7 @@ namespace AccessTokenClient.Caching
 
         private readonly IExpirationCalculator calculator;
 
-        private readonly IEncryptionService encryptionService;
+        private readonly IAccessTokenTransformer transformer;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenClientCachingDecorator"/> class.
@@ -30,14 +30,14 @@ namespace AccessTokenClient.Caching
         /// <param name="cache">The token response cache.</param>
         /// <param name="keyGenerator">The key generator.</param>
         /// <param name="calculator">The expiration calculator.</param>
-        /// <param name="encryptionService">The encryption service.</param>
-        public TokenClientCachingDecorator(ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IEncryptionService encryptionService)
+        /// <param name="transformer">The access token transformer.</param>
+        public TokenClientCachingDecorator(ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IAccessTokenTransformer transformer)
         {
-            this.decoratedClient   = decoratedClient   ?? throw new ArgumentNullException(nameof(decoratedClient));
-            this.cache             = cache             ?? throw new ArgumentNullException(nameof(cache));
-            this.keyGenerator      = keyGenerator      ?? throw new ArgumentNullException(nameof(keyGenerator));
-            this.calculator        = calculator        ?? throw new ArgumentNullException(nameof(calculator));
-            this.encryptionService = encryptionService ?? throw new ArgumentNullException(nameof(encryptionService));
+            this.decoratedClient = decoratedClient ?? throw new ArgumentNullException(nameof(decoratedClient));
+            this.cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
+            this.keyGenerator    = keyGenerator    ?? throw new ArgumentNullException(nameof(keyGenerator));
+            this.calculator      = calculator      ?? throw new ArgumentNullException(nameof(calculator));
+            this.transformer     = transformer     ?? throw new ArgumentNullException(nameof(transformer));
         }
 
         /// <summary>
@@ -56,7 +56,7 @@ namespace AccessTokenClient.Caching
 
                 if (getResult.Successful && getResult.Value != null)
                 {
-                    getResult.Value.AccessToken = encryptionService.Decrypt(getResult.Value.AccessToken);
+                    getResult.Value.AccessToken = transformer.Revert(getResult.Value.AccessToken);
 
                     return getResult.Value;
                 }
@@ -64,13 +64,22 @@ namespace AccessTokenClient.Caching
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 
-            var expiration = calculator.CalculateExpiration(tokenResponse);
-
-            tokenResponse.AccessToken = encryptionService.Encrypt(tokenResponse.AccessToken);
-
-            await cache.Set(key, tokenResponse, TimeSpan.FromMinutes(expiration));
+            await CacheTokenResponse(key, tokenResponse);
 
             return tokenResponse;
+        }
+
+        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse)
+        {
+            var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
+
+            var accessTokenValue = tokenResponse.AccessToken;
+
+            tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
+
+            await cache.Set(key, tokenResponse, expirationTimeSpan);
+
+            tokenResponse.AccessToken = accessTokenValue;
         }
     }
 }

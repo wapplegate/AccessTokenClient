@@ -13,7 +13,7 @@ steps:
     displayName: "SDK"
     inputs:
       packageType: "sdk"
-      version: "3.1.300"
+      version: "5.0.100"
   - task: DotNetCoreCLI@2
     displayName: "Restore"
     inputs:

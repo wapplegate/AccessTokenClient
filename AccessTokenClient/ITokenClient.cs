@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient
 {
+    /// <summary>
+    /// Represents a token client that requests access tokens.
+    /// </summary>
     public interface ITokenClient
     {
         /// <summary>

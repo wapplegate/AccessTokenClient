@@ -1,4 +1,5 @@
-﻿using AccessTokenClient.Expiration;
+﻿using System;
+using AccessTokenClient.Expiration;
 using FluentAssertions;
 using Xunit;
 
@@ -18,7 +19,7 @@ namespace AccessTokenClient.Tests
                 TokenType   = "token-type"
             });
 
-            result.Should().Be(5000 / 60 - 5);
+            result.Should().Be(TimeSpan.FromMinutes(5000 / 60 - 5));
         }
     }
 }

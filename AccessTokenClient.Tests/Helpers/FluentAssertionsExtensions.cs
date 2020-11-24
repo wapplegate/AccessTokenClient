@@ -3,7 +3,7 @@ using JetBrains.Annotations;
 
 namespace AccessTokenClient.Tests.Helpers
 {
-    public static class FluentAssertionExtensions
+    public static class FluentAssertionsExtensions
     {
         /// <summary>
         /// Asserts that the object to test is not null. Includes a
