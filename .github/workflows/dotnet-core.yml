@@ -20,4 +20,4 @@ jobs:
     - name: Test
       run: dotnet test --no-restore --verbosity normal
     - name: Pack
-      run: dotnet nuget push **/*.nupkg -s https://nuget.pkg.github.com/wapplegate/index.json
+      run: dotnet nuget push **/*.nupkg -s https://nuget.pkg.github.com/wapplegate/index.json --api-key ${{ secrets.GITHUB_TOKEN }}
