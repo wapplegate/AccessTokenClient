@@ -43,7 +43,7 @@ steps:
       nobuild: true
       includesymbols: true
       includesource: true
-      versioningScheme: 'byBuildNumber'
+      versioningScheme: byPrereleaseNumber
   - task: NuGetCommand@2
     displayName: "Push"
     inputs:
