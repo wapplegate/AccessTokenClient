@@ -4,7 +4,7 @@
 
 ## About
 
-This library provides an access token client that can be used when you need to make `client_credentials` OAuth requests. Instead of re-writing the same access token clients over and over again in your services, you can use this package to make those token requests easily. The package also includes the ability to cache access tokens in memory so they can be reused.
+This library provides an access token client that can be used when you need to make client credentials OAuth requests. Instead of re-writing the same access token clients over and over again in your services, you can use this package to make those token requests easily. The package also includes the ability to cache access tokens in memory so they can be reused.
 
 ## Installation
 
@@ -58,4 +58,4 @@ var tokenResponse = await client.RequestAccessToken(new TokenRequest
 });
 ```
 
-The `ITokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the `client_credentials` grant from the specified endpoint using the supplied identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.
+The `ITokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the client credentials grant from the specified endpoint using the supplied client identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token, token type, and expiration fields.

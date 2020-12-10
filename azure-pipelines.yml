@@ -37,14 +37,13 @@ steps:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
   - task: DotNetCoreCLI@2
-    displayName: "Pack"
     inputs:
       command: 'pack'
       packagesToPack: '**/*.csproj'
-      versioningScheme: 'byPrereleaseNumber'
-      majorVersion: '1'
-      minorVersion: '0'
-      patchVersion: '0'
+      nobuild: true
+      includesymbols: true
+      includesource: true
+      versioningScheme: byPrereleaseNumber
   - task: NuGetCommand@2
     displayName: "Push"
     inputs:
