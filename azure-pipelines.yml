@@ -36,6 +36,7 @@ steps:
     inputs:
       codeCoverageTool: 'Cobertura'
       summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+      failIfCoverageEmpty: true
   - task: DotNetCoreCLI@2
     inputs:
       command: 'pack'
