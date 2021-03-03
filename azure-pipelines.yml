@@ -35,7 +35,7 @@ steps:
     displayName: "Publish Coverage"
     inputs:
       codeCoverageTool: "Cobertura"
-      summaryFileLocation: "$(Build.SourcesDirectory)/TestResults/Coverage/"
+      summaryFileLocation: "$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml"
       failIfCoverageEmpty: true
   - task: DotNetCoreCLI@2
     inputs:
