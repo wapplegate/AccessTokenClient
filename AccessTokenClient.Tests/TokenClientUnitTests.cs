@@ -47,8 +47,7 @@ namespace AccessTokenClient.Tests
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
-            // Set-up the access token client, token client, and the caching decorator:
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient, 
@@ -96,8 +95,7 @@ namespace AccessTokenClient.Tests
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
-            // Set-up the token client and the caching decorator:
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
@@ -145,8 +143,7 @@ namespace AccessTokenClient.Tests
             calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
-            // Set-up the token client and the caching decorator:
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             var cachingDecorator = new TokenClientCachingDecorator(
                 tokenClient,
@@ -180,7 +177,7 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient = new HttpClient(messageHandler);
 
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
             {
@@ -202,7 +199,7 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
             {
@@ -215,9 +212,8 @@ namespace AccessTokenClient.Tests
             await function.Should().ThrowAsync<Exception>();
         }
 
-
         [Fact]
-        public async Task Ensure()
+        public async Task EnsureExceptionThrownIfUnsuccessfulStatusCodeReturned()
         {
             const string Response = "";
 
@@ -225,7 +221,7 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.NotFound);
             var httpClient = new HttpClient(messageHandler);
 
-            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
             {
@@ -250,7 +246,7 @@ namespace AccessTokenClient.Tests
             var mockDeserializer = new Mock<IResponseDeserializer>();
             mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
 
-            var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), mockDeserializer.Object);
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
             {
@@ -280,7 +276,7 @@ namespace AccessTokenClient.Tests
                 TokenType   = "type"
             });
 
-            var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+            var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), mockDeserializer.Object);
 
             Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
             {
@@ -303,7 +299,7 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(null, httpClient, new ResponseDeserializer());
+                var tokenClient = new TokenClient(null, httpClient, new HttpRequestMessageBuilder(), new ResponseDeserializer());
             };
 
             action.Should().Throw<ArgumentNullException>();
@@ -318,7 +314,22 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(logger, null, new ResponseDeserializer());
+                var tokenClient = new TokenClient(logger, null, new HttpRequestMessageBuilder(), new ResponseDeserializer());
+            };
+
+            action.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
+        public void EnsureExceptionThrownWhenBuilderIsNull()
+        {
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            Action action = () =>
+            {
+                var tokenClient = new TokenClient(logger, httpClient, null, new ResponseDeserializer());
             };
 
             action.Should().Throw<ArgumentNullException>();
@@ -333,7 +344,7 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(logger, httpClient, null);
+                var tokenClient = new TokenClient(logger, httpClient, new HttpRequestMessageBuilder(), null);
             };
 
             action.Should().Throw<ArgumentNullException>();

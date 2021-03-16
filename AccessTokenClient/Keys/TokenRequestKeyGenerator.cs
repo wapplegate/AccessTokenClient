@@ -6,12 +6,12 @@ using System.Text;
 namespace AccessTokenClient.Keys
 {
     /// <summary>
-    /// A key generator that returns a hash of the <see cref="TokenRequest"/>.
+    /// A key generator that returns a hash of the <see cref="ITokenRequest"/>.
     /// </summary>
     public class TokenRequestKeyGenerator : IKeyGenerator
     {
         /// <inheritdoc />
-        public string GenerateTokenRequestKey(TokenRequest request)
+        public string GenerateTokenRequestKey(ITokenRequest request)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -26,7 +26,7 @@ namespace AccessTokenClient.Keys
             }
         }
 
-        private static string GenerateConcatenatedRequest(TokenRequest request)
+        private static string GenerateConcatenatedRequest(ITokenRequest request)
         {
             var tokenEndpoint    = request.TokenEndpoint;
             var clientIdentifier = request.ClientIdentifier;

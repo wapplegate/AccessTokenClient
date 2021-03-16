@@ -1,5 +1,4 @@
-﻿using AccessTokenClient.Extensions;
-using AccessTokenClient.Serialization;
+﻿using AccessTokenClient.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
@@ -17,6 +16,8 @@ namespace AccessTokenClient
 
         private readonly HttpClient client;
 
+        private readonly IHttpRequestMessageBuilder builder;
+
         private readonly IResponseDeserializer deserializer;
 
         /// <summary>
@@ -24,11 +25,13 @@ namespace AccessTokenClient
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="client">The http client.</param>
+        /// <param name="builder">The http request message builder.</param>
         /// <param name="deserializer">The response deserializer.</param>
-        public TokenClient(ILogger<TokenClient> logger, HttpClient client, IResponseDeserializer deserializer)
+        public TokenClient(ILogger<TokenClient> logger, HttpClient client, IHttpRequestMessageBuilder builder, IResponseDeserializer deserializer)
         {
             this.logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
             this.client       = client       ?? throw new ArgumentNullException(nameof(client));
+            this.builder      = builder      ?? throw new ArgumentNullException(nameof(builder));
             this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
         }
 
@@ -40,7 +43,7 @@ namespace AccessTokenClient
         /// An optional function that can be passed in to override the method that executes the token request.
         /// </param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(ITokenRequest request, Func<ITokenRequest, Task<TokenResponse>> execute = null)
         {
             var tokenResponse = await ExecuteTokenRequest(request, execute);
 
@@ -54,14 +57,23 @@ namespace AccessTokenClient
             throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
         }
 
-        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute)
+        private async Task<TokenResponse> ExecuteTokenRequest(ITokenRequest request, Func<ITokenRequest, Task<TokenResponse>> execute)
         {
             if (execute != null)
             {
                 return await execute(request);
             }
 
-            var content = await client.ExecuteClientCredentialsTokenRequest(request);
+            var requestMessage = builder.GenerateHttpRequestMessage(request);
+
+            var responseMessage = await client.SendAsync(requestMessage);
+
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                throw new UnsuccessfulTokenResponseException("The request to the token endpoint was unsuccessful.");
+            }
+
+            var content = await responseMessage.Content.ReadAsStringAsync();
 
             return deserializer.Deserialize(content);
         }

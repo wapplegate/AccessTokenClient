@@ -25,7 +25,7 @@ namespace AccessTokenClient
         /// <param name="request">The token request.</param>
         /// <param name="execute">A function to override the access token request process.</param>
         /// <returns>The <see cref="TokenResponse"/>.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(ITokenRequest request, Func<ITokenRequest, Task<TokenResponse>> execute = null)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 

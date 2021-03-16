@@ -8,7 +8,7 @@ namespace AccessTokenClient.Tests
 {
     public class TokenClientIntegrationTests
     {
-        [Fact(Skip = "Skipping")]
+        [Fact(Skip = "test")]
         public async Task EnsureClientCredentialsRequestSuccessful()
         {
             var services = new ServiceCollection();
@@ -19,12 +19,14 @@ namespace AccessTokenClient.Tests
 
             var tokenClient = provider.GetService<ITokenClient>();
 
+            tokenClient.ShouldNotBeNull();
+
             var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
             {
-                ClientIdentifier = "",
-                ClientSecret     = "",
-                Scopes           = new[] { "" },
-                TokenEndpoint    = ""
+                TokenEndpoint    = "https://dev-85v9a1ld.auth0.com/oauth/token",
+                ClientIdentifier = "8sO5k8ECd5LlHEB2QZ2Dwji1zeeP1X7L",
+                ClientSecret     = "85578vmVYEXM_5LgkA2eyxsiEmRXa8gGlHJ9SQYfFBnefOnnKNfiEsDBeElCJks9",
+                Scopes           = new[] { "features:read" }
             });
 
             tokenResponse.ShouldNotBeNull();

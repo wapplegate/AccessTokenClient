@@ -13,7 +13,7 @@ namespace AccessTokenClient
         /// method will throw an exception.
         /// </summary>
         /// <param name="request">The token request.</param>
-        public static void EnsureRequestIsValid(TokenRequest request)
+        public static void EnsureRequestIsValid(ITokenRequest request)
         {
             if (string.IsNullOrWhiteSpace(request.TokenEndpoint))
             {

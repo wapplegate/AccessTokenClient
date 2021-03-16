@@ -40,6 +40,7 @@ namespace AccessTokenClient.Extensions
 
             action?.Invoke(options);
 
+            services.TryAddSingleton<IHttpRequestMessageBuilder, HttpRequestMessageBuilder>();
             services.TryAddSingleton<IResponseDeserializer, ResponseDeserializer>();
 
             var httpClientBuilder = services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
