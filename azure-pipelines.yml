@@ -29,17 +29,18 @@ steps:
     displayName: "Test"
     inputs:
       command: "test"
-      arguments: "--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura"
+      arguments: "--configuration $(BuildConfiguration) /p:CollectCoverage=true /p:CoverletOutputFormat=cobertura /p:CoverletOutput=$(Build.SourcesDirectory)/TestResults/Coverage/"
       projects: "**/*.csproj"
   - task: PublishCodeCoverageResults@1
     displayName: "Publish Coverage"
     inputs:
-      codeCoverageTool: 'Cobertura'
-      summaryFileLocation: '$(Build.SourcesDirectory)/**/coverage.cobertura.xml'
+      codeCoverageTool: "Cobertura"
+      summaryFileLocation: "$(Build.SourcesDirectory)/TestResults/Coverage/coverage.cobertura.xml"
+      failIfCoverageEmpty: true
   - task: DotNetCoreCLI@2
     inputs:
-      command: 'pack'
-      packagesToPack: '**/*.csproj'
+      command: "pack"
+      packagesToPack: "**/*.csproj"
       nobuild: true
       includesymbols: true
       includesource: true
@@ -47,7 +48,7 @@ steps:
   - task: NuGetCommand@2
     displayName: "Push"
     inputs:
-      command: 'push'
-      packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg'
-      nuGetFeedType: 'internal'
-      publishVstsFeed: '9566de23-5df9-4be2-b676-8ac0e1cbd609/45a7e446-1e14-44f0-a847-4c60611a0413'
+      command: "push"
+      packagesToPush: "$(Build.ArtifactStagingDirectory)/**/*.nupkg;!$(Build.ArtifactStagingDirectory)/**/*.symbols.nupkg"
+      nuGetFeedType: "internal"
+      publishVstsFeed: "9566de23-5df9-4be2-b676-8ac0e1cbd609/45a7e446-1e14-44f0-a847-4c60611a0413"
