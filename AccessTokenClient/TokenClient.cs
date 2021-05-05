@@ -42,6 +42,8 @@ namespace AccessTokenClient
         /// <returns>The token response.</returns>
         public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
+            logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
+
             var tokenResponse = await ExecuteTokenRequest(request, execute);
 
             if (TokenResponseValid(tokenResponse))
@@ -49,7 +51,7 @@ namespace AccessTokenClient
                 return tokenResponse;
             }
 
-            logger.LogError("An invalid token response was returned from token endpoint '{Endpoint}'.", request.TokenEndpoint);
+            logger.LogError("An invalid token response was returned from token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
 
             throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
         }
