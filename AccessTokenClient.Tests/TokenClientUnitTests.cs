@@ -38,6 +38,8 @@ namespace AccessTokenClient.Tests
                 }
             });
 
+            var decoratorLogger = new NullLogger<TokenClientCachingDecorator>();
+
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
             keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
@@ -51,6 +53,7 @@ namespace AccessTokenClient.Tests
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
+                decoratorLogger,
                 tokenClient, 
                 cacheMock.Object, 
                 keyGeneratorMock.Object, 
@@ -83,6 +86,8 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
+            var decoratorLogger = new NullLogger<TokenClientCachingDecorator>();
+
             // Set-up the token response cache mock:
             var cacheMock = new Mock<ITokenResponseCache>();
             cacheMock.Setup(m => m.KeyExists(It.IsAny<string>())).ReturnsAsync(false);
@@ -100,6 +105,7 @@ namespace AccessTokenClient.Tests
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
+                decoratorLogger,
                 tokenClient,
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
@@ -132,6 +138,8 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
             var httpClient     = new HttpClient(messageHandler);
 
+            var decoratorLogger = new NullLogger<TokenClientCachingDecorator>();
+
             // Set-up the token response cache mock:
             var cacheMock = new Mock<ITokenResponseCache>();
             cacheMock.Setup(m => m.KeyExists(It.IsAny<string>())).ReturnsAsync(false);
@@ -149,6 +157,7 @@ namespace AccessTokenClient.Tests
             var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
 
             var cachingDecorator = new TokenClientCachingDecorator(
+                decoratorLogger,
                 tokenClient,
                 cacheMock.Object,
                 keyGeneratorMock.Object,
