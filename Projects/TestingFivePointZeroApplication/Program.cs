@@ -14,7 +14,7 @@ namespace TestingFivePointZeroApplication
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
-                .WriteTo.Seq("http://localhost:80")
+                .WriteTo.Seq("http://localhost:5341")
                 .CreateLogger();
 
             try

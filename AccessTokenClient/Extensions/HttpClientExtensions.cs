@@ -37,12 +37,13 @@ namespace AccessTokenClient.Extensions
 
             var responseMessage = await client.SendAsync(requestMessage);
 
-            if (!responseMessage.IsSuccessStatusCode)
+            if (responseMessage.IsSuccessStatusCode)
             {
-                throw new UnsuccessfulTokenResponseException("The request to the token endpoint was unsuccessful.");
+                return await responseMessage.Content.ReadAsStringAsync();
             }
 
-            return await responseMessage.Content.ReadAsStringAsync();
+            var statusCode = (int)responseMessage.StatusCode;
+            throw new UnsuccessfulTokenResponseException($"Token request failed with status code {statusCode}.");
         }
     }
 }

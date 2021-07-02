@@ -1,6 +1,7 @@
 ﻿using AccessTokenClient.Expiration;
 using AccessTokenClient.Keys;
 using AccessTokenClient.Transformation;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -13,6 +14,8 @@ namespace AccessTokenClient.Caching
     /// </summary>
     public class TokenClientCachingDecorator : ITokenClient
     {
+        private readonly ILogger<TokenClientCachingDecorator> logger;
+
         private readonly ITokenClient decoratedClient;
 
         private readonly ITokenResponseCache cache;
@@ -26,13 +29,15 @@ namespace AccessTokenClient.Caching
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenClientCachingDecorator"/> class.
         /// </summary>
+        /// <param name="logger">The logger.</param>
         /// <param name="decoratedClient">The decorated instance.</param>
         /// <param name="cache">The token response cache.</param>
         /// <param name="keyGenerator">The key generator.</param>
         /// <param name="calculator">The expiration calculator.</param>
         /// <param name="transformer">The access token transformer.</param>
-        public TokenClientCachingDecorator(ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IAccessTokenTransformer transformer)
+        public TokenClientCachingDecorator(ILogger<TokenClientCachingDecorator> logger, ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IAccessTokenTransformer transformer)
         {
+            this.logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
             this.decoratedClient = decoratedClient ?? throw new ArgumentNullException(nameof(decoratedClient));
             this.cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
             this.keyGenerator    = keyGenerator    ?? throw new ArgumentNullException(nameof(keyGenerator));
@@ -50,16 +55,24 @@ namespace AccessTokenClient.Caching
         {
             var key = keyGenerator.GenerateTokenRequestKey(request);
 
+            logger.LogInformation("Checking if token response with key '{Key}' exists in the token cache.", key);
+
             if (await cache.KeyExists(key))
             {
+                logger.LogInformation("Token response with key '{Key}' exists in the token cache.", key);
+
                 var getResult = await cache.Get(key);
 
                 if (getResult.Successful && getResult.Value != null)
                 {
+                    logger.LogInformation("Successfully retrieved token response with key '{Key}' from the token cache successfully.", key);
+
                     getResult.Value.AccessToken = transformer.Revert(getResult.Value.AccessToken);
 
                     return getResult.Value;
                 }
+
+                logger.LogWarning("Unable to retrieve token response with key '{Key}' from the token cache.", key);
             }
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
@@ -71,13 +84,24 @@ namespace AccessTokenClient.Caching
 
         private async Task CacheTokenResponse(string key, TokenResponse tokenResponse)
         {
+            logger.LogInformation("Attempting to store token response with key '{Key}' in the token cache.", key);
+
             var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
 
             var accessTokenValue = tokenResponse.AccessToken;
 
             tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
 
-            await cache.Set(key, tokenResponse, expirationTimeSpan);
+            var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan);
+
+            if (tokenStoredSuccessfully)
+            {
+                logger.LogInformation("Successfully stored token response with key '{Key}' in the token cache.", key);
+            }
+            else
+            {
+                logger.LogWarning("Unable to store token response with key '{Key}' in the token cache.", key);
+            }
 
             tokenResponse.AccessToken = accessTokenValue;
         }

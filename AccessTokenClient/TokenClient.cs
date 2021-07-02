@@ -42,18 +42,19 @@ namespace AccessTokenClient
         /// <returns>The token response.</returns>
         public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
-            logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
-
-            var tokenResponse = await ExecuteTokenRequest(request, execute);
-
-            if (TokenResponseValid(tokenResponse))
+            try
             {
+                logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
+
+                var tokenResponse = await ExecuteTokenRequest(request, execute);
+
                 return tokenResponse;
             }
-
-            logger.LogError("An invalid token response was returned from token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
-
-            throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
+            catch (Exception exception)
+            {
+                logger.LogError(exception, "An error occurred when executing the token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
+                throw;
+            }
         }
 
         private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute)
@@ -65,7 +66,21 @@ namespace AccessTokenClient
 
             var content = await client.ExecuteClientCredentialsTokenRequest(request);
 
-            return deserializer.Deserialize(content);
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                throw new InvalidTokenResponseException($"A null or empty response was returned from token endpoint '{request.TokenEndpoint}'.");
+            }
+
+            var tokenResponse = deserializer.Deserialize(content);
+
+            if (!TokenResponseValid(tokenResponse))
+            {
+                throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
+            }
+
+            logger.LogInformation("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);
+
+            return tokenResponse;
         }
 
         private static bool TokenResponseValid(TokenResponse response)
