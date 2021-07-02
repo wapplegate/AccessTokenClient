@@ -15,9 +15,24 @@ namespace AccessTokenClient.Tests
     public class TokenClientCachingDecoratorTests
     {
         [Fact]
+        public void EnsureExceptionThrownWhenLoggerIsNull()
+        {
+            Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                null,
+                new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
+                new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
+                new TokenRequestKeyGenerator(),
+                new DefaultExpirationCalculator(),
+                new DefaultAccessTokenTransformer());
+
+            creationAction.Should().Throw<ArgumentNullException>();
+        }
+
+        [Fact]
         public void EnsureExceptionThrownWhenTokenClientIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                new NullLogger<TokenClientCachingDecorator>(),
                 null,
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
@@ -31,6 +46,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenTokenResponseCacheIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                new NullLogger<TokenClientCachingDecorator>(),
                 new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
                 null,
                 new TokenRequestKeyGenerator(),
@@ -44,6 +60,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenKeyGeneratorIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                new NullLogger<TokenClientCachingDecorator>(),
                 new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 null,
@@ -57,6 +74,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenExpirationCalculatorIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                new NullLogger<TokenClientCachingDecorator>(),
                 new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
@@ -70,6 +88,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenTransformerIsNull()
         {
             Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
+                new NullLogger<TokenClientCachingDecorator>(),
                 new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
