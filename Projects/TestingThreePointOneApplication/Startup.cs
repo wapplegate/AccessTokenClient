@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TestingThreePointOneApplication
 {
@@ -17,37 +18,25 @@ namespace TestingThreePointOneApplication
 
         public IConfiguration Configuration { get; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMemoryCache();
 
             services.AddAccessTokenClient(builderAction: builder =>
             {
-                builder.AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy());
+                builder.AddPolicyHandler((provider, _) =>
+                {
+                    var logger = provider.GetService<ILogger<ITokenClient>>();
+                    return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
+                });
             });
-
-            // Register the options for the client:
-            services.AddSingleton(new TestingClientOptions
-            {
-                TokenEndpoint    = "https://localhost:44342/connect/token",
-                ClientIdentifier = "client",
-                ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
-                Scopes           = new[] { "api1" }
-            });
-
-            // Register the client and specify that the access token delegating handler be used:
-            services
-                .AddHttpClient<ITestingClient, TestingClient>()
-                .AddClientAccessTokenHandler<TestingClientOptions>();
 
             services.AddControllers();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
         {
-            if (env.IsDevelopment())
+            if (environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
@@ -56,7 +45,10 @@ namespace TestingThreePointOneApplication
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapControllers(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
     }
 }

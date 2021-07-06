@@ -15,7 +15,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenOptionsAreNull()
         {
             ITokenEndpointOptions options = new Options();
-            Action action = () => new AccessTokenDelegatingHandler(options, null);
+            Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
 
             action.Should().Throw<ArgumentNullException>();
         }
@@ -24,7 +24,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenTokenClientIsNull()
         {
             var mockClient = new Mock<ITokenClient>();
-            Action action = () => new AccessTokenDelegatingHandler(null, mockClient.Object);
+            Action action = () => _ = new AccessTokenDelegatingHandler(null, mockClient.Object);
 
             action.Should().Throw<ArgumentNullException>();
         }
@@ -40,8 +40,7 @@ namespace AccessTokenClient.Tests
                 .ReturnsAsync(new TokenResponse
                 {
                     AccessToken = "1234567890",
-                    ExpiresIn   = 3000,
-                    TokenType   = "type"
+                    ExpiresIn   = 3000
                 });
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://test.com");

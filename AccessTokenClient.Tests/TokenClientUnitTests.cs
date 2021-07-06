@@ -10,6 +10,7 @@ using Moq;
 using System;
 using System.Net;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -28,14 +29,9 @@ namespace AccessTokenClient.Tests
 
             // Set-up the token response cache mock:
             var cacheMock = new Mock<ITokenResponseCache>();
-            cacheMock.Setup(m => m.KeyExists(It.IsAny<string>())).ReturnsAsync(true);
-            cacheMock.Setup(m => m.Get(It.IsAny<string>())).ReturnsAsync(new TokenGetResult<TokenResponse>
+            cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync(new TokenResponse
             {
-                Successful = true,
-                Value = new TokenResponse
-                {
-                    AccessToken = "1234567890"
-                }
+                AccessToken = "1234567890"
             });
 
             var decoratorLogger = new NullLogger<TokenClientCachingDecorator>();
@@ -90,7 +86,7 @@ namespace AccessTokenClient.Tests
 
             // Set-up the token response cache mock:
             var cacheMock = new Mock<ITokenResponseCache>();
-            cacheMock.Setup(m => m.KeyExists(It.IsAny<string>())).ReturnsAsync(false);
+            cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null);
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
@@ -142,7 +138,7 @@ namespace AccessTokenClient.Tests
 
             // Set-up the token response cache mock:
             var cacheMock = new Mock<ITokenResponseCache>();
-            cacheMock.Setup(m => m.KeyExists(It.IsAny<string>())).ReturnsAsync(false);
+            cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null);
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
@@ -285,8 +281,7 @@ namespace AccessTokenClient.Tests
             mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)new TokenResponse
             {
                 AccessToken = "",
-                ExpiresIn   = 3000,
-                TokenType   = "type"
+                ExpiresIn   = 3000
             });
 
             var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);

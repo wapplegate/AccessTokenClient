@@ -64,18 +64,16 @@ namespace AccessTokenClient.Tests
         }
 
         [Fact]
-        public async Task EnsureExceptionNotThrownRequestComplete()
+        public async Task EnsureExceptionIsNotThrownWhenRequestIsValid()
         {
             const string AccessToken = "123";
             const int ExpiresIn      = 5000;
-            const string TokenType   = "token-type";
 
             var tokenClientMock = new Mock<ITokenClient>();
             tokenClientMock.Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), null)).ReturnsAsync(new TokenResponse
             {
                 AccessToken = AccessToken,
                 ExpiresIn   = ExpiresIn,
-                TokenType   = TokenType
             });
             var decoratedTokenClient = tokenClientMock.Object;
 
@@ -91,7 +89,6 @@ namespace AccessTokenClient.Tests
             result.ShouldNotBeNull();
             result.AccessToken.Should().Be(AccessToken);
             result.ExpiresIn.Should().Be(ExpiresIn);
-            result.TokenType.Should().Be(TokenType);
         }
     }
 }

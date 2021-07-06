@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
@@ -9,18 +10,12 @@ namespace AccessTokenClient.Caching
     public interface ITokenResponseCache
     {
         /// <summary>
-        /// Determines if the specified key exists in the cache.
-        /// </summary>
-        /// <param name="key">The cache key.</param>
-        /// <returns>A value indicating whether the key exists in the cache.</returns>
-        Task<bool> KeyExists(string key);
-
-        /// <summary>
         /// Gets the token response associated to the given key, if it exists.
         /// </summary>
         /// <param name="key">The cache key.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>A result containing the token response.</returns>
-        Task<TokenGetResult<TokenResponse>> Get(string key);
+        Task<TokenResponse> Get(string key, CancellationToken token = default);
 
         /// <summary>
         /// Sets a token response in the cache with the specified expiration.
@@ -28,7 +23,8 @@ namespace AccessTokenClient.Caching
         /// <param name="key">The cache key.</param>
         /// <param name="response">The token response to store in the cache.</param>
         /// <param name="expiration">The expiration time span.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>A value indicating if the set operation was successful.</returns>
-        Task<bool> Set(string key, TokenResponse response, TimeSpan expiration);
+        Task<bool> Set(string key, TokenResponse response, TimeSpan expiration, CancellationToken token = default);
     }
 }

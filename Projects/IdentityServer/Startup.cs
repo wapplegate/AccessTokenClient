@@ -40,8 +40,8 @@ namespace IdentityServer
                 options.Events.RaiseSuccessEvents     = true;
             })
             .AddTestUsers(TestUsers.Users)
-            .AddInMemoryIdentityResources(Config.Ids)
-            .AddInMemoryApiResources(Config.Apis)
+            .AddInMemoryIdentityResources(Config.IdentityResources)
+            .AddInMemoryApiResources(Config.Resources)
             .AddInMemoryClients(Config.Clients);
 
             builder.AddDeveloperSigningCredential();
@@ -64,7 +64,10 @@ namespace IdentityServer
 
             app.UseAuthorization();
 
-            app.UseEndpoints(endpoints => { endpoints.MapDefaultControllerRoute(); });
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapDefaultControllerRoute();
+            });
         }
     }
 }

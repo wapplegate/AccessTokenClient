@@ -55,25 +55,20 @@ namespace AccessTokenClient.Caching
         {
             var key = keyGenerator.GenerateTokenRequestKey(request);
 
-            logger.LogInformation("Checking if token response with key '{Key}' exists in the token cache.", key);
+            logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
 
-            if (await cache.KeyExists(key))
+            var cachedTokenResponse = await cache.Get(key);
+
+            if (cachedTokenResponse != null)
             {
-                logger.LogInformation("Token response with key '{Key}' exists in the token cache.", key);
+                logger.LogInformation("Successfully retrieved the token response with key '{Key}' from the cache successfully.", key);
 
-                var getResult = await cache.Get(key);
+                cachedTokenResponse.AccessToken = transformer.Revert(cachedTokenResponse.AccessToken);
 
-                if (getResult.Successful && getResult.Value != null)
-                {
-                    logger.LogInformation("Successfully retrieved token response with key '{Key}' from the token cache successfully.", key);
-
-                    getResult.Value.AccessToken = transformer.Revert(getResult.Value.AccessToken);
-
-                    return getResult.Value;
-                }
-
-                logger.LogWarning("Unable to retrieve token response with key '{Key}' from the token cache.", key);
+                return cachedTokenResponse;
             }
+
+            logger.LogInformation("Token response with key '{Key}' does not exist in the cache.", key);
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
 
@@ -84,7 +79,7 @@ namespace AccessTokenClient.Caching
 
         private async Task CacheTokenResponse(string key, TokenResponse tokenResponse)
         {
-            logger.LogInformation("Attempting to store token response with key '{Key}' in the token cache.", key);
+            logger.LogInformation("Attempting to store token response with key '{Key}' in the cache.", key);
 
             var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
 
@@ -96,11 +91,11 @@ namespace AccessTokenClient.Caching
 
             if (tokenStoredSuccessfully)
             {
-                logger.LogInformation("Successfully stored token response with key '{Key}' in the token cache.", key);
+                logger.LogInformation("Successfully stored token response with key '{Key}' in the cache.", key);
             }
             else
             {
-                logger.LogWarning("Unable to store token response with key '{Key}' in the token cache.", key);
+                logger.LogWarning("Unable to store token response with key '{Key}' in the cache.", key);
             }
 
             tokenResponse.AccessToken = accessTokenValue;

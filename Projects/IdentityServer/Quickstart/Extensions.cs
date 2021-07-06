@@ -11,17 +11,17 @@ namespace IdentityServer.Quickstart
         /// Determines whether the client is configured to use PKCE.
         /// </summary>
         /// <param name="store">The store.</param>
-        /// <param name="client_id">The client identifier.</param>
-        /// <returns></returns>
-        public static async Task<bool> IsPkceClientAsync(this IClientStore store, string client_id)
+        /// <param name="clientIdentifier">The client identifier.</param>
+        /// <returns>A value indicating whether the client requires PKCE.</returns>
+        public static async Task<bool> IsPkceClientAsync(this IClientStore store, string clientIdentifier)
         {
-            if (!string.IsNullOrWhiteSpace(client_id))
+            if (string.IsNullOrWhiteSpace(clientIdentifier))
             {
-                var client = await store.FindEnabledClientByIdAsync(client_id);
-                return client?.RequirePkce == true;
+                return false;
             }
 
-            return false;
+            var client = await store.FindEnabledClientByIdAsync(clientIdentifier);
+            return client?.RequirePkce == true;
         }
 
         public static IActionResult LoadingPage(this Controller controller, string viewName, string redirectUri)

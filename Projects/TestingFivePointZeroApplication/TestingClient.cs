@@ -3,7 +3,7 @@ using System;
 using System.Net.Http;
 using System.Threading.Tasks;
 
-namespace TestingThreePointOneApplication
+namespace TestingFivePointZeroApplication
 {
     public class TestingClient : ITestingClient
     {
