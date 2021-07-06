@@ -3,7 +3,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace AccessTokenClient.Keys
+namespace AccessTokenClient.Caching
 {
     /// <summary>
     /// A key generator that returns a hash of the <see cref="TokenRequest"/>.
@@ -17,13 +17,11 @@ namespace AccessTokenClient.Keys
 
             var concatenated = GenerateConcatenatedRequest(request);
 
-            using (var hasher = new SHA256Managed())
-            {
-                var textData = Encoding.UTF8.GetBytes(concatenated);
-                var hash     = hasher.ComputeHash(textData);
+            using var hasher = new SHA256Managed();
+            var textData = Encoding.UTF8.GetBytes(concatenated);
+            var hash = hasher.ComputeHash(textData);
 
-                return BitConverter.ToString(hash).Replace("-", string.Empty);
-            }
+            return BitConverter.ToString(hash).Replace("-", string.Empty);
         }
 
         private static string GenerateConcatenatedRequest(TokenRequest request)

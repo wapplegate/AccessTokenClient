@@ -1,4 +1,4 @@
-﻿namespace AccessTokenClient.Keys
+﻿namespace AccessTokenClient.Caching
 {
     /// <summary>
     /// Represents a key generator that generates a cache key from a <see cref="TokenRequest"/>.

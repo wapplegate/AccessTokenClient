@@ -1,6 +1,6 @@
-﻿using System;
-using AccessTokenClient.Expiration;
+﻿using AccessTokenClient.Caching;
 using FluentAssertions;
+using System;
 using Xunit;
 
 namespace AccessTokenClient.Tests

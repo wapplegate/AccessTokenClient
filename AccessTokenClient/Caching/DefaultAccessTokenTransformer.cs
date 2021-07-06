@@ -1,4 +1,4 @@
-﻿namespace AccessTokenClient.Transformation
+﻿namespace AccessTokenClient.Caching
 {
     /// <summary>
     /// The default transformer which provides no conversion or reversion of the access token.

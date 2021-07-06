@@ -1,8 +1,5 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Expiration;
-using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
-using AccessTokenClient.Transformation;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;

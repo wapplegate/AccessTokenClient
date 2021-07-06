@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AccessTokenClient.Expiration
+namespace AccessTokenClient.Caching
 {
     /// <summary>
     /// Represents a calculator that calculates the minutes until the access token expires.

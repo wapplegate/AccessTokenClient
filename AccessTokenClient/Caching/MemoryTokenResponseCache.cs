@@ -27,7 +27,7 @@ namespace AccessTokenClient.Caching
         {
             var exists = cache.TryGetValue<TokenResponse>(key, out var cachedTokenResponse);
 
-            return !exists ? null : Task.FromResult(cachedTokenResponse);
+            return !exists ? Task.FromResult<TokenResponse>(null) : Task.FromResult(cachedTokenResponse);
         }
 
         /// <inheritdoc />

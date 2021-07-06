@@ -1,4 +1,5 @@
-﻿using AccessTokenClient.Extensions;
+﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,18 +11,39 @@ namespace AccessTokenClient.Tests
     public class ServiceCollectionExtensionsTests
     {
         [Fact]
-        public void EnsureExceptionThrownIfServiceCollectionIsNull()
+        public void EnsureExceptionThrownWhenServiceCollectionIsNull()
         {
             IServiceCollection services = null;
 
             // ReSharper disable once ExpressionIsAlwaysNull
-            Action action = () => services.AddAccessTokenClient();
+            Action action1 = () => services.AddAccessTokenClient();
 
-            action.Should().Throw<ArgumentNullException>();
+            // ReSharper disable once ExpressionIsAlwaysNull
+            Action action2 = () => services.AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+
+            action1.Should().Throw<ArgumentNullException>();
+            action2.Should().Throw<ArgumentNullException>();
         }
 
         [Fact]
-        public void EnsureServiceProviderReturnsTokenClient()
+        public void EnsureServiceProviderReturnsTokenClientWhenCachingEnabled()
+        {
+            var services = new ServiceCollection();
+
+            services.AddMemoryCache();
+
+            services.AddAccessTokenClient().AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+
+            var provider = services.BuildServiceProvider();
+
+            var client = provider.GetService<ITokenClient>();
+
+            client.ShouldNotBeNull();
+            client.Should().BeOfType<TokenClientCachingDecorator>();
+        }
+
+        [Fact]
+        public void EnsureServiceProviderReturnsTokenClientWhenCachingDisabled()
         {
             var services = new ServiceCollection();
 
@@ -34,24 +56,7 @@ namespace AccessTokenClient.Tests
             var client = provider.GetService<ITokenClient>();
 
             client.ShouldNotBeNull();
-            client.Should().BeOfType<TokenClientValidationDecorator>();
-        }
-
-        [Fact]
-        public void EnsureServiceProviderReturnsTokenClientWhenCachingDisabled()
-        {
-            var services = new ServiceCollection();
-
-            services.AddMemoryCache();
-
-            services.AddAccessTokenClient(x => x.EnableCaching = false);
-
-            var provider = services.BuildServiceProvider();
-
-            var client = provider.GetService<ITokenClient>();
-
-            client.ShouldNotBeNull();
-            client.Should().BeOfType<TokenClientValidationDecorator>();
+            client.Should().BeOfType<TokenClient>();
         }
     }
 }

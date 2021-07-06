@@ -1,4 +1,5 @@
 ﻿using AccessTokenClient;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
@@ -17,7 +18,7 @@ namespace Benchmarks
             {
                 var services = new ServiceCollection();
 
-                services.AddMemoryCache().AddAccessTokenClient(x => x.EnableCaching = false);
+                services.AddMemoryCache().AddAccessTokenClient().AddAccessTokenClientCaching<MemoryTokenResponseCache>();
 
                 var provider = services.BuildServiceProvider();
 

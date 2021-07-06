@@ -1,9 +1,6 @@
 using AccessTokenClient.Caching;
-using AccessTokenClient.Expiration;
-using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
 using AccessTokenClient.Tests.Helpers;
-using AccessTokenClient.Transformation;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
@@ -57,9 +54,7 @@ namespace AccessTokenClient.Tests
                 mockTransformer.Object
             );
 
-            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
-
-            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
+            var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -109,9 +104,7 @@ namespace AccessTokenClient.Tests
                 mockTransformer.Object
             );
 
-            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
-
-            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
+            var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -161,9 +154,7 @@ namespace AccessTokenClient.Tests
                 mockTransformer.Object
             );
 
-            ITokenClient validationDecorator = new TokenClientValidationDecorator(cachingDecorator);
-
-            var tokenResponse = await validationDecorator.RequestAccessToken(new TokenRequest
+            var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
             {
                 TokenEndpoint    = "http://www.test.com",
                 ClientIdentifier = "123",
@@ -307,7 +298,7 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(null, httpClient, new ResponseDeserializer());
+                var _ = new TokenClient(null, httpClient, new ResponseDeserializer());
             };
 
             action.Should().Throw<ArgumentNullException>();
@@ -322,7 +313,7 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(logger, null, new ResponseDeserializer());
+                var _ = new TokenClient(logger, null, new ResponseDeserializer());
             };
 
             action.Should().Throw<ArgumentNullException>();
@@ -337,7 +328,7 @@ namespace AccessTokenClient.Tests
 
             Action action = () =>
             {
-                var tokenClient = new TokenClient(logger, httpClient, null);
+                var _ = new TokenClient(logger, httpClient, null);
             };
 
             action.Should().Throw<ArgumentNullException>();

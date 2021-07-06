@@ -42,6 +42,8 @@ namespace AccessTokenClient
         /// <returns>The token response.</returns>
         public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
+            TokenRequestValidator.EnsureRequestIsValid(request);
+
             try
             {
                 logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);

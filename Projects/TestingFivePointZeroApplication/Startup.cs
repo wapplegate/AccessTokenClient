@@ -1,4 +1,5 @@
 using AccessTokenClient;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -24,15 +25,16 @@ namespace TestingFivePointZeroApplication
 
             services.AddMemoryCache();
 
-            services.AddAccessTokenClient(builderAction: builder =>
+            services.AddAccessTokenClient(builder =>
             {
                 builder.AddPolicyHandler((provider, _) =>
                 {
                     var logger = provider.GetService<ILogger<ITokenClient>>();
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
-            });
-
+            })
+            .AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+            
             services.AddSingleton(new TestingClientOptions
             {
                 TokenEndpoint    = "https://localhost:44342/connect/token",

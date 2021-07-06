@@ -1,6 +1,8 @@
-﻿using AccessTokenClient.Extensions;
+﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 
@@ -13,18 +15,23 @@ namespace AccessTokenClient.Tests
         {
             var services = new ServiceCollection();
 
-            services.AddMemoryCache().AddAccessTokenClient(x => x.EnableCaching = false);
+            services.AddMemoryCache().AddAccessTokenClient().AddAccessTokenClientCaching<MemoryTokenResponseCache>();
 
             var provider = services.BuildServiceProvider();
 
             var tokenClient = provider.GetService<ITokenClient>();
 
+            if (tokenClient == null)
+            {
+                throw new Exception("The token client is null.");
+            }
+
             var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
             {
+                TokenEndpoint    = "",
                 ClientIdentifier = "",
                 ClientSecret     = "",
-                Scopes           = new[] { "" },
-                TokenEndpoint    = ""
+                Scopes           = new[] { "" }
             });
 
             tokenResponse.ShouldNotBeNull();

@@ -1,7 +1,4 @@
-﻿using AccessTokenClient.Expiration;
-using AccessTokenClient.Keys;
-using AccessTokenClient.Transformation;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
 using System.Threading.Tasks;
 
@@ -53,6 +50,8 @@ namespace AccessTokenClient.Caching
         /// <returns>The token response.</returns>
         public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
         {
+            TokenRequestValidator.EnsureRequestIsValid(request);
+
             var key = keyGenerator.GenerateTokenRequestKey(request);
 
             logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);

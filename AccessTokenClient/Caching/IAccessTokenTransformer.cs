@@ -1,4 +1,4 @@
-﻿namespace AccessTokenClient.Transformation
+﻿namespace AccessTokenClient.Caching
 {
     /// <summary>
     /// Represents a transformer that converts and reverts an access token from one state to another.

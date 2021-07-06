@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Keys;
+﻿using AccessTokenClient.Caching;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using System;
@@ -61,8 +61,8 @@ namespace AccessTokenClient.Tests
 
             var tokenRequestTwo = new TokenRequest
             {
-                ClientIdentifier = "CLIENTIDENTIFIER",
-                ClientSecret     = "CLIENTSECRET",
+                ClientIdentifier = "ClientIdentifier",
+                ClientSecret     = "ClientSecret",
                 Scopes           = new[] { "SCOPE_1", "SCOPE_2", "SCOPE_3" },
                 TokenEndpoint    = "https://www.token-endpoint.com"
             };
