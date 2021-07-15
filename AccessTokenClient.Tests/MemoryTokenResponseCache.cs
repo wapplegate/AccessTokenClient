@@ -45,5 +45,15 @@ namespace AccessTokenClient.Tests
             }, TimeSpan.FromMinutes(3000));
             result.Should().BeTrue();
         }
+
+        [Fact]
+        public async Task EnsureNullReturnedWhenItemWithMatchingKeyDoesNotExist()
+        {
+            const string Key = "testing-key";
+            IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var cache = new MemoryTokenResponseCache(memoryCache);
+            var result = await cache.Get(Key);
+            result.Should().BeNull();
+        }
     }
 }
