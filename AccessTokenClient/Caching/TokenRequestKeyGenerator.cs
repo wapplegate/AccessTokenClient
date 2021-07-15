@@ -15,10 +15,10 @@ namespace AccessTokenClient.Caching
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
-            var concatenated = GenerateConcatenatedRequest(request);
+            var concatenatedRequest = GenerateConcatenatedRequest(request);
 
             using var hasher = new SHA256Managed();
-            var textData = Encoding.UTF8.GetBytes(concatenated);
+            var textData = Encoding.UTF8.GetBytes(concatenatedRequest);
             var hash = hasher.ComputeHash(textData);
 
             var convertedHash = BitConverter.ToString(hash).Replace("-", string.Empty);

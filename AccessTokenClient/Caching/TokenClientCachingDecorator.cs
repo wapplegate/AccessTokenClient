@@ -78,7 +78,7 @@ namespace AccessTokenClient.Caching
             return tokenResponse;
         }
 
-        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse, CancellationToken token)
+        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse, CancellationToken cancellationToken)
         {
             logger.LogInformation("Attempting to store token response with key '{Key}' in the cache.", key);
 
@@ -88,7 +88,7 @@ namespace AccessTokenClient.Caching
 
             tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
 
-            var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, token);
+            var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, cancellationToken);
 
             if (tokenStoredSuccessfully)
             {

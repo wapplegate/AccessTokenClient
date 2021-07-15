@@ -24,7 +24,7 @@ namespace AccessTokenClient.Tests
             var key = generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
             key.ShouldNotBeNull();
-            key.Should().Contain("AccessTokenClient");
+            key.Should().Contain("AccessTokenClient::");
         }
 
         [Fact]
