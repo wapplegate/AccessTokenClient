@@ -48,15 +48,19 @@ namespace AccessTokenClient.Extensions
         /// An implementation of the <see cref="ITokenResponseCache"/> interface to register.
         /// </typeparam>
         /// <param name="services">The service collection.</param>
+        /// <param name="action">An optional action used to configure the token client cache options.</param>
         /// <returns>The service collection instance.</returns>
-        public static IServiceCollection AddAccessTokenClientCaching<T>(this IServiceCollection services) where T : ITokenResponseCache
+        public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions> action = null) where T : ITokenResponseCache
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
 
-            services.TryAddSingleton<IExpirationCalculator, DefaultExpirationCalculator>();
+            var options = new TokenClientCacheOptions();
+            action?.Invoke(options);
+
+            services.TryAddSingleton(options);
             services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
             services.TryAddSingleton(typeof(ITokenResponseCache), typeof(T));
             services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();

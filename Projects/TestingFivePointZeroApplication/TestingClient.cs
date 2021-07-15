@@ -27,7 +27,7 @@ namespace TestingFivePointZeroApplication
         Task<string> Get();
     }
 
-    public class TestingClientOptions : ITokenEndpointOptions
+    public class TestingClientOptions : ITokenRequestOptions
     {
         public string TokenEndpoint { get; set; }
 

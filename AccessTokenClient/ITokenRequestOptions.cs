@@ -1,10 +1,10 @@
 ﻿namespace AccessTokenClient
 {
     /// <summary>
-    /// Represents token endpoint options that are necessary
+    /// Represents token request options that are necessary
     /// to make a client credentials request.
     /// </summary>
-    public interface ITokenEndpointOptions
+    public interface ITokenRequestOptions
     {
         /// <summary>
         /// Gets or sets the token endpoint.

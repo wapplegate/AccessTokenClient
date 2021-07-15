@@ -9,7 +9,8 @@
         /// Generates a cache key from the given token request.
         /// </summary>
         /// <param name="request">The token request to generate a key for.</param>
+        /// <param name="prefix">The cache key prefix.</param>
         /// <returns>The token request key.</returns>
-        string GenerateTokenRequestKey(TokenRequest request);
+        string GenerateTokenRequestKey(TokenRequest request, string prefix);
     }
 }

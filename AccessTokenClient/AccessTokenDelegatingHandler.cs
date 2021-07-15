@@ -12,7 +12,7 @@ namespace AccessTokenClient
     /// </summary>
     public class AccessTokenDelegatingHandler : DelegatingHandler
     {
-        private readonly ITokenEndpointOptions options;
+        private readonly ITokenRequestOptions options;
 
         private readonly ITokenClient client;
 
@@ -21,7 +21,7 @@ namespace AccessTokenClient
         /// </summary>
         /// <param name="options">The token endpoint options.</param>
         /// <param name="client">The access token client.</param>
-        public AccessTokenDelegatingHandler(ITokenEndpointOptions options, ITokenClient client)
+        public AccessTokenDelegatingHandler(ITokenRequestOptions options, ITokenClient client)
         {
             this.options = options ?? throw new ArgumentNullException(nameof(options));
             this.client  = client  ?? throw new ArgumentNullException(nameof(client));

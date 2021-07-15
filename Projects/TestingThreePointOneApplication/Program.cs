@@ -18,7 +18,7 @@ namespace TestingThreePointOneApplication
 
             try
             {
-                Log.Information("Starting the web host.");
+                Log.Information("Starting the host...");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)

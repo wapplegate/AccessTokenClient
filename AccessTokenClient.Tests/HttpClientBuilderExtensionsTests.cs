@@ -38,7 +38,7 @@ namespace AccessTokenClient.Tests
             }
         }
 
-        public class TestClientTokenOptions : ITokenEndpointOptions
+        public class TestClientTokenOptions : ITokenRequestOptions
         {
             public string TokenEndpoint { get; set; }
 

@@ -15,7 +15,7 @@ namespace AccessTokenClient
         /// <typeparam name="T">The type of options to inject into the handler.</typeparam>
         /// <param name="httpClientBuilder">The http client builder.</param>
         /// <returns>The http client builder instance.</returns>
-        public static IHttpClientBuilder AddClientAccessTokenHandler<T>(this IHttpClientBuilder httpClientBuilder) where T : ITokenEndpointOptions
+        public static IHttpClientBuilder AddClientAccessTokenHandler<T>(this IHttpClientBuilder httpClientBuilder) where T : ITokenRequestOptions
         {
             return httpClientBuilder.AddHttpMessageHandler(provider =>
             {

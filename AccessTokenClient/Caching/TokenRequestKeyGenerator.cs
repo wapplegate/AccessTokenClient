@@ -11,7 +11,7 @@ namespace AccessTokenClient.Caching
     public class TokenRequestKeyGenerator : IKeyGenerator
     {
         /// <inheritdoc />
-        public string GenerateTokenRequestKey(TokenRequest request)
+        public string GenerateTokenRequestKey(TokenRequest request, string prefix)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -21,7 +21,9 @@ namespace AccessTokenClient.Caching
             var textData = Encoding.UTF8.GetBytes(concatenated);
             var hash = hasher.ComputeHash(textData);
 
-            return BitConverter.ToString(hash).Replace("-", string.Empty);
+            var convertedHash = BitConverter.ToString(hash).Replace("-", string.Empty);
+
+            return $"{prefix}::{convertedHash}";
         }
 
         private static string GenerateConcatenatedRequest(TokenRequest request)

@@ -15,11 +15,11 @@ namespace AccessTokenClient.Caching
 
         private readonly ITokenClient decoratedClient;
 
+        private readonly TokenClientCacheOptions options;
+
         private readonly ITokenResponseCache cache;
 
         private readonly IKeyGenerator keyGenerator;
-
-        private readonly IExpirationCalculator calculator;
 
         private readonly IAccessTokenTransformer transformer;
 
@@ -28,17 +28,17 @@ namespace AccessTokenClient.Caching
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="decoratedClient">The decorated instance.</param>
+        /// <param name="options">The token client cache options.</param>
         /// <param name="cache">The token response cache.</param>
         /// <param name="keyGenerator">The key generator.</param>
-        /// <param name="calculator">The expiration calculator.</param>
         /// <param name="transformer">The access token transformer.</param>
-        public TokenClientCachingDecorator(ILogger<TokenClientCachingDecorator> logger, ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IAccessTokenTransformer transformer)
+        public TokenClientCachingDecorator(ILogger<TokenClientCachingDecorator> logger, ITokenClient decoratedClient, TokenClientCacheOptions options, ITokenResponseCache cache, IKeyGenerator keyGenerator, IAccessTokenTransformer transformer)
         {
             this.logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
             this.decoratedClient = decoratedClient ?? throw new ArgumentNullException(nameof(decoratedClient));
+            this.options         = options         ?? throw new ArgumentNullException(nameof(options));
             this.cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
             this.keyGenerator    = keyGenerator    ?? throw new ArgumentNullException(nameof(keyGenerator));
-            this.calculator      = calculator      ?? throw new ArgumentNullException(nameof(calculator));
             this.transformer     = transformer     ?? throw new ArgumentNullException(nameof(transformer));
         }
 
@@ -52,7 +52,7 @@ namespace AccessTokenClient.Caching
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
-            var key = keyGenerator.GenerateTokenRequestKey(request);
+            var key = keyGenerator.GenerateTokenRequestKey(request, options.CacheKeyPrefix);
 
             logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
 
@@ -80,7 +80,7 @@ namespace AccessTokenClient.Caching
         {
             logger.LogInformation("Attempting to store token response with key '{Key}' in the cache.", key);
 
-            var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
+            var expirationTimeSpan = TimeSpan.FromMinutes(tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer);
 
             var accessTokenValue = tokenResponse.AccessToken;
 

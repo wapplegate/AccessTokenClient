@@ -35,11 +35,8 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
-            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
+            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>(), It.IsAny<string>())).Returns("KEY-123");
 
-            // Set-up the key calculator mock:
-            var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the access token client, token client, and the caching decorator:
@@ -47,10 +44,10 @@ namespace AccessTokenClient.Tests
 
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 decoratorLogger,
-                tokenClient, 
+                tokenClient,
+                new TokenClientCacheOptions(),
                 cacheMock.Object, 
-                keyGeneratorMock.Object, 
-                calculatorMock.Object, 
+                keyGeneratorMock.Object,
                 mockTransformer.Object
             );
 
@@ -85,11 +82,8 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
-            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
+            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>(), It.IsAny<string>())).Returns("KEY-123");
 
-            // Set-up the key calculator mock:
-            var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:
@@ -98,9 +92,9 @@ namespace AccessTokenClient.Tests
             ITokenClient cachingDecorator = new TokenClientCachingDecorator(
                 decoratorLogger,
                 tokenClient,
+                new TokenClientCacheOptions(),
                 cacheMock.Object, 
                 keyGeneratorMock.Object,
-                calculatorMock.Object,
                 mockTransformer.Object
             );
 
@@ -135,11 +129,8 @@ namespace AccessTokenClient.Tests
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();
-            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>())).Returns("KEY-123");
+            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>(), It.IsAny<string>())).Returns("KEY-123");
 
-            // Set-up the key calculator mock:
-            var calculatorMock = new Mock<IExpirationCalculator>();
-            calculatorMock.Setup(m => m.CalculateExpiration(It.IsAny<TokenResponse>())).Returns(TimeSpan.FromMinutes(10));
             var mockTransformer = new Mock<IAccessTokenTransformer>();
 
             // Set-up the token client and the caching decorator:
@@ -148,9 +139,9 @@ namespace AccessTokenClient.Tests
             var cachingDecorator = new TokenClientCachingDecorator(
                 decoratorLogger,
                 tokenClient,
+                new TokenClientCacheOptions(),
                 cacheMock.Object,
                 keyGeneratorMock.Object,
-                calculatorMock.Object,
                 mockTransformer.Object
             );
 
@@ -231,7 +222,7 @@ namespace AccessTokenClient.Tests
                 Scopes           = new[] { "scope:read" }
             });
 
-            await function.Should().ThrowAsync<UnsuccessfulTokenResponseException>();
+            await function.Should().ThrowAsync<HttpRequestException>();
         }
 
         [Fact]
@@ -256,7 +247,7 @@ namespace AccessTokenClient.Tests
                 Scopes           = new[] { "scope:read" }
             });
 
-            await function.Should().ThrowAsync<InvalidTokenResponseException>();
+            await function.Should().ThrowAsync<HttpRequestException>();
         }
 
         [Fact]
@@ -285,7 +276,7 @@ namespace AccessTokenClient.Tests
                 Scopes           = new[] { "scope:read" }
             });
 
-            await function.Should().ThrowAsync<InvalidTokenResponseException>();
+            await function.Should().ThrowAsync<HttpRequestException>();
         }
 
         [Fact]

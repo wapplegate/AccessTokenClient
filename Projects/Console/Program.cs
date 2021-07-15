@@ -25,7 +25,7 @@ namespace Console
                 .AddLogging(configure => configure.AddSerilog())
                 .AddMemoryCache()
                 .AddAccessTokenClient(builder => builder.AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy()))
-                .AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+                .AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
             var provider = services.BuildServiceProvider();
 

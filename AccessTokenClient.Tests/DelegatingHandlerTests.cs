@@ -14,7 +14,7 @@ namespace AccessTokenClient.Tests
         [Fact]
         public void EnsureExceptionThrownWhenOptionsAreNull()
         {
-            ITokenEndpointOptions options = new Options();
+            ITokenRequestOptions options = new Options();
             Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
 
             action.Should().Throw<ArgumentNullException>();
@@ -32,7 +32,7 @@ namespace AccessTokenClient.Tests
         [Fact]
         public async Task EnsureAccessTokenAddedToRequest()
         {
-            ITokenEndpointOptions options = new Options();
+            ITokenRequestOptions options = new Options();
             var mockClient = new Mock<ITokenClient>();
 
             mockClient
@@ -62,7 +62,7 @@ namespace AccessTokenClient.Tests
         }
     }
 
-    public class Options : ITokenEndpointOptions
+    public class Options : ITokenRequestOptions
     {
         public string TokenEndpoint { get; set; }
 

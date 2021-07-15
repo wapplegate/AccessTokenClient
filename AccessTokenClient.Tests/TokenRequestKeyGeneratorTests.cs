@@ -21,9 +21,10 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "https://www.token-endpoint.com"
             };
 
-            var key = generator.GenerateTokenRequestKey(request);
+            var key = generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
             key.ShouldNotBeNull();
+            key.Should().Contain("AccessTokenClient");
         }
 
         [Fact]
@@ -39,7 +40,7 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "https://www.token-endpoint.com"
             };
 
-            Action action = () => generator.GenerateTokenRequestKey(request);
+            Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
             action.Should().Throw<Exception>();
         }
@@ -57,7 +58,7 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "https://www.token-endpoint.com"
             };
 
-            var keyOne = generator.GenerateTokenRequestKey(tokenRequestOne);
+            var keyOne = generator.GenerateTokenRequestKey(tokenRequestOne, "AccessTokenClient");
 
             var tokenRequestTwo = new TokenRequest
             {
@@ -67,7 +68,7 @@ namespace AccessTokenClient.Tests
                 TokenEndpoint    = "https://www.token-endpoint.com"
             };
 
-            var keyTwo = generator.GenerateTokenRequestKey(tokenRequestTwo);
+            var keyTwo = generator.GenerateTokenRequestKey(tokenRequestTwo, "AccessTokenClient");
 
             keyOne.ShouldNotBeNull();
             keyTwo.ShouldNotBeNull();

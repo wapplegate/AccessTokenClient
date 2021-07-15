@@ -43,7 +43,8 @@ namespace AccessTokenClient.Extensions
             }
 
             var statusCode = (int)responseMessage.StatusCode;
-            throw new UnsuccessfulTokenResponseException($"Token request failed with status code {statusCode}.");
+
+            throw new HttpRequestException($"The token request failed with status code {statusCode}.");
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using IdentityServer.Quickstart;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,23 +22,22 @@ namespace IdentityServer
             services.Configure<IISOptions>(iis =>
             {
                 iis.AuthenticationDisplayName = "Windows";
-                iis.AutomaticAuthentication   = false;
+                iis.AutomaticAuthentication = false;
             });
 
             services.Configure<IISServerOptions>(iis =>
             {
                 iis.AuthenticationDisplayName = "Windows";
-                iis.AutomaticAuthentication   = false;
+                iis.AutomaticAuthentication = false;
             });
 
             var builder = services.AddIdentityServer(options =>
             {
-                options.Events.RaiseErrorEvents       = true;
+                options.Events.RaiseErrorEvents = true;
                 options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents     = true;
-                options.Events.RaiseSuccessEvents     = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
             })
-            .AddTestUsers(TestUsers.Users)
             .AddInMemoryIdentityResources(Config.IdentityResources)
             .AddInMemoryApiResources(Config.Resources)
             .AddInMemoryClients(Config.Clients);

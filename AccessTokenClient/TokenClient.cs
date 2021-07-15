@@ -70,14 +70,14 @@ namespace AccessTokenClient
 
             if (string.IsNullOrWhiteSpace(content))
             {
-                throw new InvalidTokenResponseException($"A null or empty response was returned from token endpoint '{request.TokenEndpoint}'.");
+                throw new HttpRequestException($"A null or empty response was returned from token endpoint '{request.TokenEndpoint}'.");
             }
 
             var tokenResponse = deserializer.Deserialize(content);
 
             if (!TokenResponseValid(tokenResponse))
             {
-                throw new InvalidTokenResponseException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
+                throw new HttpRequestException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
             }
 
             logger.LogInformation("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);

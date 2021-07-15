@@ -33,7 +33,11 @@ namespace TestingFivePointZeroApplication
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
             })
-            .AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+            .AddAccessTokenClientCache<MemoryTokenResponseCache>(options =>
+            {
+                options.ExpirationBuffer = 5;
+                options.CacheKeyPrefix   = "";
+            });
             
             services.AddSingleton(new TestingClientOptions
             {

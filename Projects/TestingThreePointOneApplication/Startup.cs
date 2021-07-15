@@ -31,7 +31,7 @@ namespace TestingThreePointOneApplication
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
             })
-            .AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+            .AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
             services.AddControllers();
         }

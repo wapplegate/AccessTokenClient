@@ -18,7 +18,7 @@ namespace Benchmarks
             {
                 var services = new ServiceCollection();
 
-                services.AddMemoryCache().AddAccessTokenClient().AddAccessTokenClientCaching<MemoryTokenResponseCache>();
+                services.AddMemoryCache().AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
                 var provider = services.BuildServiceProvider();
 
