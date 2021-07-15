@@ -3,6 +3,7 @@ using AccessTokenClient.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Net.Http;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient
@@ -39,8 +40,9 @@ namespace AccessTokenClient
         /// <param name="execute">
         /// An optional function that can be passed in to override the method that executes the token request.
         /// </param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken token = default)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -48,7 +50,7 @@ namespace AccessTokenClient
             {
                 logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
 
-                var tokenResponse = await ExecuteTokenRequest(request, execute);
+                var tokenResponse = await ExecuteTokenRequest(request, execute, token);
 
                 return tokenResponse;
             }
@@ -59,14 +61,14 @@ namespace AccessTokenClient
             }
         }
 
-        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute)
+        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute, CancellationToken token)
         {
             if (execute != null)
             {
                 return await execute(request);
             }
 
-            var content = await client.ExecuteClientCredentialsTokenRequest(request);
+            var content = await client.ExecuteClientCredentialsTokenRequest(request, token);
 
             if (string.IsNullOrWhiteSpace(content))
             {

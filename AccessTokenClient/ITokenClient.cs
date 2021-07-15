@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient
@@ -15,7 +16,8 @@ namespace AccessTokenClient
         /// <param name="execute">
         /// An optional function that can be passed in to override the method that executes the token request.
         /// </param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null);
+        Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken token = default);
     }
 }

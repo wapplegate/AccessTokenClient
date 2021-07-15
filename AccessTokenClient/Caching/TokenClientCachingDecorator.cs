@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
@@ -47,8 +48,9 @@ namespace AccessTokenClient.Caching
         /// </summary>
         /// <param name="request">The token request.</param>
         /// <param name="execute">An optional execute function that will override the default request implementation.</param>
+        /// <param name="token">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken token = default)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -69,7 +71,7 @@ namespace AccessTokenClient.Caching
 
             logger.LogInformation("Token response with key '{Key}' does not exist in the cache.", key);
 
-            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute, token);
 
             await CacheTokenResponse(key, tokenResponse);
 

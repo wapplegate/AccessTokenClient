@@ -36,7 +36,7 @@ namespace AccessTokenClient.Tests
             var mockClient = new Mock<ITokenClient>();
 
             mockClient
-                .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<Func<TokenRequest, Task<TokenResponse>>>()))
+                .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<Func<TokenRequest, Task<TokenResponse>>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenResponse
                 {
                     AccessToken = "1234567890",
