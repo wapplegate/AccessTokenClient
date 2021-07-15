@@ -23,16 +23,20 @@ namespace AccessTokenClient.Caching
         }
 
         /// <inheritdoc />
-        public Task<TokenResponse> Get(string key, CancellationToken token = default)
+        public Task<TokenResponse> Get(string key, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             var exists = cache.TryGetValue<TokenResponse>(key, out var cachedTokenResponse);
 
             return !exists ? Task.FromResult<TokenResponse>(null) : Task.FromResult(cachedTokenResponse);
         }
 
         /// <inheritdoc />
-        public Task<bool> Set(string key, TokenResponse response, TimeSpan expiration, CancellationToken token = default)
+        public Task<bool> Set(string key, TokenResponse response, TimeSpan expiration, CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             cache.Set(key, response, expiration);
 
             return Task.FromResult(true);

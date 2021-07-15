@@ -40,9 +40,9 @@ namespace AccessTokenClient
         /// <param name="execute">
         /// An optional function that can be passed in to override the method that executes the token request.
         /// </param>
-        /// <param name="token">The cancellation token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken token = default)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken cancellationToken = default)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -50,7 +50,7 @@ namespace AccessTokenClient
             {
                 logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
 
-                var tokenResponse = await ExecuteTokenRequest(request, execute, token);
+                var tokenResponse = await ExecuteTokenRequest(request, execute, cancellationToken);
 
                 return tokenResponse;
             }
@@ -61,14 +61,14 @@ namespace AccessTokenClient
             }
         }
 
-        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute, CancellationToken token)
+        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute, CancellationToken cancellationToken)
         {
             if (execute != null)
             {
                 return await execute(request);
             }
 
-            var content = await client.ExecuteClientCredentialsTokenRequest(request, token);
+            var content = await client.ExecuteClientCredentialsTokenRequest(request, cancellationToken);
 
             if (string.IsNullOrWhiteSpace(content))
             {

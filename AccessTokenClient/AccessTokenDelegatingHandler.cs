@@ -41,7 +41,7 @@ namespace AccessTokenClient
                 ClientIdentifier = options.ClientIdentifier,
                 ClientSecret     = options.ClientSecret,
                 Scopes           = options.Scopes
-            });
+            }, cancellationToken: cancellationToken);
 
             if (result != null && !string.IsNullOrWhiteSpace(result.AccessToken))
             {

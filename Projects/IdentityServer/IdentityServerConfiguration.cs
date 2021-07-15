@@ -3,14 +3,8 @@ using System.Collections.Generic;
 
 namespace IdentityServer
 {
-    public static class Config
+    public static class IdentityServerConfiguration
     {
-        public static IEnumerable<IdentityResource> IdentityResources => new IdentityResource[]
-        {
-            //new IdentityResources.OpenId(),
-            //new IdentityResources.Profile()
-        };
-
         public static IEnumerable<ApiResource> Resources => new[]
         {
             new ApiResource("employee:read", "The ability to read employee data."),

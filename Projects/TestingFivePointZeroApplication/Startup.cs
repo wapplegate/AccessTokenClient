@@ -36,7 +36,7 @@ namespace TestingFivePointZeroApplication
             .AddAccessTokenClientCache<MemoryTokenResponseCache>(options =>
             {
                 options.ExpirationBuffer = 5;
-                options.CacheKeyPrefix   = "";
+                options.CacheKeyPrefix   = "AccessTokenClient";
             });
             
             services.AddSingleton(new TestingClientOptions

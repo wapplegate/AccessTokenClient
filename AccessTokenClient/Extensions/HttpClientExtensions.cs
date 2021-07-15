@@ -17,9 +17,9 @@ namespace AccessTokenClient.Extensions
         /// </summary>
         /// <param name="client">The http client.</param>
         /// <param name="request">The token request.</param>
-        /// <param name="token">The cancellation token.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public static async Task<string> ExecuteClientCredentialsTokenRequest(this HttpClient client, TokenRequest request, CancellationToken token)
+        public static async Task<string> ExecuteClientCredentialsTokenRequest(this HttpClient client, TokenRequest request, CancellationToken cancellationToken)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -37,7 +37,7 @@ namespace AccessTokenClient.Extensions
 
             var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
 
-            var responseMessage = await client.SendAsync(requestMessage, token);
+            var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
 
             if (responseMessage.IsSuccessStatusCode)
             {
