@@ -62,7 +62,7 @@ namespace AccessTokenClient.Caching
 
             if (cachedTokenResponse != null)
             {
-                logger.LogInformation("Successfully retrieved the token response with key '{Key}' from the cache successfully.", key);
+                logger.LogInformation("Successfully retrieved the token response with key '{Key}' from the cache.", key);
 
                 cachedTokenResponse.AccessToken = transformer.Revert(cachedTokenResponse.AccessToken);
 
