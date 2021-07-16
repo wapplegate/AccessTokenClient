@@ -113,8 +113,10 @@ namespace AccessTokenClient.Tests
             messageHandler.NumberOfCalls.Should().Be(1);
         }
 
-        [Fact]
-        public async Task EnsureTokenResponseReturnedWhenSetOperationFails()
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        public async Task EnsureTokenResponseReturnedWhenCacheSetOperationIsSuccessfulOrFails(bool setResult)
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
@@ -133,7 +135,7 @@ namespace AccessTokenClient.Tests
 
             cacheMock
                 .Setup(m => m.Set(It.IsAny<string>(),It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
-                .ReturnsAsync(false);
+                .ReturnsAsync(setResult);
 
             // Set-up the key generator mock:
             var keyGeneratorMock = new Mock<IKeyGenerator>();

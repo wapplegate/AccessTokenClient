@@ -3,6 +3,7 @@ using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging.Abstractions;
 using System;
 using Xunit;
 
@@ -36,6 +37,24 @@ namespace AccessTokenClient.Tests
             services.AddAccessTokenClient(builder =>
             {
                 builder.AddPolicyHandler(_ => AccessTokenClientPolicy.GetDefaultRetryPolicy());
+            });
+
+            var provider = services.BuildServiceProvider();
+
+            var client = provider.GetService<ITokenClient>();
+
+            client.ShouldNotBeNull();
+            client.Should().BeOfType<TokenClient>();
+        }
+
+        [Fact]
+        public void EnsureServiceProviderReturnsTokenClientWhenRetryPolicySpecifiedWithLogger()
+        {
+            var services = new ServiceCollection();
+
+            services.AddAccessTokenClient(builder =>
+            {
+                builder.AddPolicyHandler(_ => AccessTokenClientPolicy.GetDefaultRetryPolicy(new NullLogger<ITokenClient>()));
             });
 
             var provider = services.BuildServiceProvider();
