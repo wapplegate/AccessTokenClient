@@ -59,7 +59,32 @@ namespace AccessTokenClient.Tests
         }
 
         [Fact]
-        public async Task EnsureExceptionThrownWhenTokenResponseIsNull()
+        public async Task EnsureExceptionThrownWhenServerErrorReturned()
+        {
+            const string Response = "";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.InternalServerError);
+            var httpClient = new HttpClient(messageHandler);
+
+            var mockDeserializer = new Mock<IResponseDeserializer>();
+            mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
+
+            var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+
+            Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.token-endpoint.com",
+                ClientIdentifier = "client-identifier",
+                ClientSecret     = "client-secret",
+                Scopes           = new[] { "scope:read" }
+            });
+
+            await function.Should().ThrowAsync<HttpRequestException>();
+        }
+
+        [Fact]
+        public async Task EnsureExceptionThrownWhenDeserializerReturnsNullTokenResponse()
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
@@ -84,7 +109,7 @@ namespace AccessTokenClient.Tests
         }
 
         [Fact]
-        public async Task EnsureExceptionThrownWhenTokenResponseAccessTokenIsEmpty()
+        public async Task EnsureExceptionThrownWhenDeserializerReturnsEmptyAccessToken()
         {
             const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
 
