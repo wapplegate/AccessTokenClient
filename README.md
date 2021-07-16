@@ -90,3 +90,80 @@ var tokenResponse = await client.RequestAccessToken(new TokenRequest
 ```
 
 The `ITokenClient` interface has one method `RequestAccessToken`. This method will request an access token using the client credentials grant from the specified endpoint using the supplied client identifier, secret, and scopes. If the request is successful, a `TokenResponse` will be returned which contains the access token and expiration fields.
+
+## Automatically Adding the Access Token to Outgoing Requests
+
+A more advanced usage scenario provided by the `AccessTokenClient` package is the ability to use the token client to automatically add an access token to requests which require an access token. Imagine a client which may need to provide an access token when making a request.
+
+```csharp
+public class TestClient
+{
+    private readonly TestClientTokenOptions options;
+
+    private readonly HttpClient httpClient;
+
+    private readonly ITokenClient tokenClient;
+
+    public TestClient(TestClientTokenOptions options, HttpClient httpClient, ITokenClient tokenClient)
+    {
+        this.options     = options;
+        this.httpClient  = httpClient;
+        this.tokenClient = tokenClient;
+    }
+
+    public async Task<string> GetData()
+    {
+        var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = options.TokenEndpoint,
+            ClientIdentifier = options.ClientIdentifier,
+            ClientSecret     = options.ClientSecret,
+            Scopes           = options.Scopes
+        });
+
+        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer {tokenResponse.AccessToken}");
+
+        var response = await httpClient.GetAsync("https://test.com/data");
+
+        return await response.Content.ReadAsStringAsync();
+    }
+}
+
+public class TestClientTokenOptions : ITokenRequestOptions
+{
+    public string TokenEndpoint { get; set; }
+
+    public string ClientIdentifier { get; set; }
+
+    public string ClientSecret { get; set; }
+
+    public string[] Scopes { get; set; }
+}
+```
+
+Options need to be injected into the `TestClient`. The token client needs to be injected as well. The `RequestAccessToken` needs to be executed and the authorization header needs to be set to use the access token that is returned from the token client. If there are multiple methods in the client this becomes cumbersome. Instead of doing this in every method, use the `AddClientAccessTokenHandler` extension method to wire up automatic token retrieval when registering the client using the `AddHttpClient` extension method.
+
+```csharp
+services.AddHttpClient<TestClient>().AddClientAccessTokenHandler<TestClientTokenOptions>();
+```
+
+The handler will request and add an access token to outgoing requests from the `TestClient` class. Now the `TestClient` can be simplified as shown below.
+
+```csharp
+public class TestClient
+{
+    private readonly HttpClient httpClient;
+
+    public TestClient(HttpClient httpClient)
+    {
+        this.httpClient  = httpClient;
+    }
+
+    public async Task<string> GetData()
+    {
+        var response = await httpClient.GetAsync("https://test.com/data");
+
+        return await response.Content.ReadAsStringAsync();
+    }
+}
+```
