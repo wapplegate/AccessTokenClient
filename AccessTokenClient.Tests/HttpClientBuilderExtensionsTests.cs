@@ -28,7 +28,7 @@ namespace AccessTokenClient.Tests
             client.ShouldNotBeNull();
         }
 
-        public class TestClient
+        private class TestClient
         {
             private readonly HttpClient client;
 
@@ -38,7 +38,7 @@ namespace AccessTokenClient.Tests
             }
         }
 
-        public class TestClientTokenOptions : ITokenRequestOptions
+        private class TestClientTokenOptions : ITokenRequestOptions
         {
             public string TokenEndpoint { get; set; }
 

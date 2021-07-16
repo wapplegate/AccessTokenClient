@@ -54,6 +54,8 @@ namespace AccessTokenClient.Caching
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var key = keyGenerator.GenerateTokenRequestKey(request, options.CacheKeyPrefix);
 
             logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);

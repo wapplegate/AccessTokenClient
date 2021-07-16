@@ -23,6 +23,8 @@ namespace AccessTokenClient.Extensions
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var uri = new Uri(request.TokenEndpoint);
 
             var scopes = request.Scopes != null ? string.Join(" ", request.Scopes) : string.Empty;
