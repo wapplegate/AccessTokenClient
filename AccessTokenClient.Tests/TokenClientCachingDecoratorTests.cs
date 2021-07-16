@@ -164,6 +164,7 @@ namespace AccessTokenClient.Tests
         {
             Func<Task<TokenResponse>> creationAction = async () =>
             {
+                // Cancel the token before executing the decorator so it throws immediately:
                 var source = new CancellationTokenSource();
                 source.Cancel();
 

@@ -190,6 +190,7 @@ namespace AccessTokenClient.Tests
             var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
             var httpClient = new HttpClient(messageHandler);
 
+            // Cancel the token before executing the token client so it throws immediately:
             var source = new CancellationTokenSource();
             source.Cancel();
             
