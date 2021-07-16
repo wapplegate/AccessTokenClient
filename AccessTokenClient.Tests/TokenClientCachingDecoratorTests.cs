@@ -62,7 +62,6 @@ namespace AccessTokenClient.Tests
 
             tokenResponse.ShouldNotBeNull();
 
-            messageHandler.NumberOfCalls.ShouldNotBeNull();
             messageHandler.NumberOfCalls.Should().Be(0);
         }
 
@@ -108,8 +107,64 @@ namespace AccessTokenClient.Tests
             });
 
             tokenResponse.ShouldNotBeNull();
+            tokenResponse.AccessToken.ShouldNotBeNull();
+            tokenResponse.AccessToken.Should().Be("1234567890");
 
-            messageHandler.NumberOfCalls.ShouldNotBeNull();
+            messageHandler.NumberOfCalls.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task EnsureTokenResponseReturnedWhenSetOperationFails()
+        {
+            const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+            var logger = new NullLogger<TokenClient>();
+            var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+            var httpClient = new HttpClient(messageHandler);
+
+            var decoratorLogger = new NullLogger<TokenClientCachingDecorator>();
+
+            // Set-up the token response cache mock:
+            var cacheMock = new Mock<ITokenResponseCache>();
+
+            cacheMock
+                .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync((TokenResponse)null);
+
+            cacheMock
+                .Setup(m => m.Set(It.IsAny<string>(),It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+                .ReturnsAsync(false);
+
+            // Set-up the key generator mock:
+            var keyGeneratorMock = new Mock<IKeyGenerator>();
+            keyGeneratorMock.Setup(m => m.GenerateTokenRequestKey(It.IsAny<TokenRequest>(), It.IsAny<string>())).Returns("KEY-123");
+
+            var mockTransformer = new Mock<IAccessTokenTransformer>();
+
+            // Set-up the token client and the caching decorator:
+            var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+
+            ITokenClient cachingDecorator = new TokenClientCachingDecorator(
+                decoratorLogger,
+                tokenClient,
+                new TokenClientCacheOptions(),
+                cacheMock.Object,
+                keyGeneratorMock.Object,
+                mockTransformer.Object
+            );
+
+            var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
+            {
+                TokenEndpoint    = "http://www.token-endpoint.com",
+                ClientIdentifier = "client-identifier",
+                ClientSecret     = "client-secret",
+                Scopes           = new[] { "scope:read" }
+            });
+
+            tokenResponse.ShouldNotBeNull();
+            tokenResponse.AccessToken.ShouldNotBeNull();
+            tokenResponse.AccessToken.Should().Be("1234567890");
+
             messageHandler.NumberOfCalls.Should().Be(1);
         }
 
@@ -154,8 +209,9 @@ namespace AccessTokenClient.Tests
             });
 
             tokenResponse.ShouldNotBeNull();
+            tokenResponse.AccessToken.ShouldNotBeNull();
+            tokenResponse.AccessToken.Should().Be("1234567890");
 
-            messageHandler.NumberOfCalls.ShouldNotBeNull();
             messageHandler.NumberOfCalls.Should().Be(1);
         }
 
