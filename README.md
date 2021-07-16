@@ -2,11 +2,11 @@
 
 ## About
 
-This library provides an access token client that can be used when you need to make client credentials OAuth requests. Instead of re-writing the same access token clients over and over again in your services, you can use this package to make those token requests. The package also includes the ability to cache access tokens in memory so they can be reused and provides extension points so you can create a cache implementation that suits your needs.
+This library provides an access token client that can be used to make client credentials OAuth requests. Instead of re-writing the same access token clients over and over again for services, use this package to make those token requests. The package also includes the ability to cache access tokens in memory so they can be reused and provides extension points for custom cache implementations.
 
 ## Installation
 
-In order to begin using the token client, install the `AccessTokenClient` and `AccessTokenClient.Extensions` nuget packages. The extensions package includes a service collection extension method which will create the required service registrations for you.
+In order to begin using the token client, install the `AccessTokenClient` and `AccessTokenClient.Extensions` nuget packages. The extensions package includes a service collection extension method which will register the required services.
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -17,7 +17,7 @@ public void ConfigureServices(IServiceCollection services)
 
 ## Retrying Failed Token Requests
 
-The `AddAccessTokenClient` extension method accepts an action that can be used to configure the `IHttpClientBuilder` used internally by the token client. Here you can provide a custom policy to retry failed requests to the token endpoint. The `AccessTokenClient.Extensions` package contains a default retry policy which can be used.
+The `AddAccessTokenClient` extension method accepts an action that can be used to configure the `IHttpClientBuilder` used internally when registering the token client. A custom policy to retry failed requests to the token endpoint can be provided. The `AccessTokenClient.Extensions` package contains a default retry policy which can be used.
 
 ```csharp
 services.AddAccessTokenClient(builder =>
@@ -34,7 +34,7 @@ The default policy configures the token client to retry twice when a transient e
 
 ## Caching
 
-By default, access tokens will not be cached. To enable caching, use the `AddAccessTokenClientCache` extension method and specify `MemoryTokenResponseCache` as a generic type argument as shown below.
+By default, access tokens will not be cached. To enable caching, use the `AddAccessTokenClientCache` extension method and specify `MemoryTokenResponseCache` as a type argument as shown below.
 
 ```csharp
 public void ConfigureServices(IServiceCollection services)
@@ -45,7 +45,7 @@ public void ConfigureServices(IServiceCollection services)
 }
 ```
 
-You'll need to register an implementation of `IMemoryCache` using the `AddMemoryCache` service collection extension method provided by Microsoft in order to use the `MemoryTokenResponseCache`. The `AddAccessTokenClientCache` method accepts a generic type which must implement the `ITokenResponseCache` interface. A custom token response cache can implement this interface and be used instead of the default. A common usage scenario might include using a distributed cache for access token instead of a memory cache.
+An implementation of `IMemoryCache` will need to be registered using the `AddMemoryCache` service collection extension method provided by Microsoft in order to use the `MemoryTokenResponseCache`. The `AddAccessTokenClientCache` method accepts a type argument which must implement the `ITokenResponseCache` interface. A custom token response cache can implement this interface and be used instead of the default token cache. A common usage scenario might include using a distributed cache for access token caching instead of a memory cache.
 
 There are two configuration options available when using the `AddAccessTokenClientCache` method:
 
@@ -57,11 +57,11 @@ services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCac
 });
 ```
 
-The `ExpirationBuffer` option lets you set an expiration buffer in minutes. This buffer will reduce the time the access token is cached for to ensure the token is valid for use. By default the buffer is set to 5 minutes unless changed. The `CacheKeyPrefix` option lets you specify a prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
+The `ExpirationBuffer` option allows an expiration buffer to be set in minutes. This buffer will reduce the time the access token is cached for to ensure the token is nto cached longer than its lifetime. By default the buffer is set to 5 minutes unless changed. The `CacheKeyPrefix` option allows a custom cache key prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
 
 ## Usage
 
-Once configured, you can then inject an instance of the `ITokenClient` type into your controllers or services.
+Once configured, inject an instance of the `ITokenClient` type into controllers or services as shown below.
 
 ```csharp
 public class Service
@@ -75,7 +75,7 @@ public class Service
 }
 ```
 
-Here is an example of using the token client to make a request to your token endpoint:
+Here is an example of using the token client to make a request to a token endpoint:
 
 ```csharp
 var tokenResponse = await client.RequestAccessToken(new TokenRequest
