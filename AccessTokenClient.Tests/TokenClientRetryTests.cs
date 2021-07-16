@@ -26,7 +26,7 @@ namespace AccessTokenClient.Tests
             // Configure an http client with the default retry policy handler and a mock http message handler:
             services
                 .AddHttpClient("TestingClient")
-                .AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy())
+                .AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy(new NullLogger<ITokenClient>()))
                 .AddHttpMessageHandler(() => mockHandler);
 
             // Retrieve the configured client from the service provider:
