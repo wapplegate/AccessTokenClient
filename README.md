@@ -139,13 +139,13 @@ public class TestClientTokenOptions : ITokenRequestOptions
 }
 ```
 
-Options need to be injected into the `TestClient`. The token client needs to be injected as well. The `RequestAccessToken` needs to be executed and the authorization header needs to be set to use the access token that is returned from the token client. If there are multiple methods in the client this becomes cumbersome. Instead of doing this in every method, use the `AddClientAccessTokenHandler` extension method to wire up automatic token retrieval when registering the client using the `AddHttpClient` extension method.
+Options and the token client need to be injected into the `TestClient`. The `RequestAccessToken` method needs to be executed and the authorization header needs to be set to use the access token that is returned from the token client. If there are multiple methods in the client this becomes cumbersome. Instead of doing this in every method, use the `AddClientAccessTokenHandler` extension method to wire up automatic token retrieval when registering the client using the `AddHttpClient` extension method.
 
 ```csharp
 services.AddHttpClient<TestClient>().AddClientAccessTokenHandler<TestClientTokenOptions>();
 ```
 
-The handler will request and add an access token to outgoing requests from the `TestClient` class. Now the `TestClient` can be simplified as shown below.
+The handler will request then add an access token to outgoing requests from the `TestClient` class. Now the `TestClient` can be simplified as shown below.
 
 ```csharp
 public class TestClient
