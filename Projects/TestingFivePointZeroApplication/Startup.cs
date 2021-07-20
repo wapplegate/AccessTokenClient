@@ -1,9 +1,12 @@
+using AccessTokenClient;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace TestingFivePointZeroApplication
 {
@@ -22,15 +25,36 @@ namespace TestingFivePointZeroApplication
 
             services.AddMemoryCache();
 
-            services.AddAccessTokenClient(builderAction: builder =>
+            services.AddAccessTokenClient(builder =>
             {
-                builder.AddPolicyHandler(AccessTokenClientPolicy.GetDefaultRetryPolicy());
+                builder.AddPolicyHandler((provider, _) =>
+                {
+                    var logger = provider.GetService<ILogger<ITokenClient>>();
+                    return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
+                });
+            })
+            .AddAccessTokenClientCache<MemoryTokenResponseCache>(options =>
+            {
+                options.ExpirationBuffer = 5;
+                options.CacheKeyPrefix   = "AccessTokenClient";
             });
+            
+            services.AddSingleton(new TestingClientOptions
+            {
+                TokenEndpoint    = "https://localhost:44342/connect/token",
+                ClientIdentifier = "client",
+                ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
+                Scopes           = new[] { "api1" }
+            });
+
+            services
+                .AddHttpClient<ITestingClient, TestingClient>()
+                .AddClientAccessTokenHandler<TestingClientOptions>();
         }
 
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment environment)
         {
-            if (env.IsDevelopment())
+            if (environment.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }

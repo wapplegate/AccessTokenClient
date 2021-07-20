@@ -14,8 +14,8 @@ namespace AccessTokenClient.Tests
         [Fact]
         public void EnsureExceptionThrownWhenOptionsAreNull()
         {
-            ITokenEndpointOptions options = new Options();
-            Action action = () => new AccessTokenDelegatingHandler(options, null);
+            ITokenRequestOptions options = new Options();
+            Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
 
             action.Should().Throw<ArgumentNullException>();
         }
@@ -24,7 +24,7 @@ namespace AccessTokenClient.Tests
         public void EnsureExceptionThrownWhenTokenClientIsNull()
         {
             var mockClient = new Mock<ITokenClient>();
-            Action action = () => new AccessTokenDelegatingHandler(null, mockClient.Object);
+            Action action = () => _ = new AccessTokenDelegatingHandler(null, mockClient.Object);
 
             action.Should().Throw<ArgumentNullException>();
         }
@@ -32,16 +32,15 @@ namespace AccessTokenClient.Tests
         [Fact]
         public async Task EnsureAccessTokenAddedToRequest()
         {
-            ITokenEndpointOptions options = new Options();
+            ITokenRequestOptions options = new Options();
             var mockClient = new Mock<ITokenClient>();
 
             mockClient
-                .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<Func<TokenRequest, Task<TokenResponse>>>()))
+                .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<Func<TokenRequest, Task<TokenResponse>>>(), It.IsAny<CancellationToken>()))
                 .ReturnsAsync(new TokenResponse
                 {
                     AccessToken = "1234567890",
-                    ExpiresIn   = 3000,
-                    TokenType   = "type"
+                    ExpiresIn   = 3000
                 });
 
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, "http://test.com");
@@ -63,7 +62,7 @@ namespace AccessTokenClient.Tests
         }
     }
 
-    public class Options : ITokenEndpointOptions
+    public class Options : ITokenRequestOptions
     {
         public string TokenEndpoint { get; set; }
 

@@ -1,8 +1,5 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Expiration;
-using AccessTokenClient.Keys;
 using AccessTokenClient.Serialization;
-using AccessTokenClient.Transformation;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -17,10 +14,9 @@ namespace AccessTokenClient.Extensions
     public static class ServiceCollectionExtensions
     {
         /// <summary>
-        /// Adds the token client and dependencies to the service collection.
+        /// Adds the token client to the service collection.
         /// </summary>
         /// <param name="services">The service collection.</param>
-        /// <param name="action">An optional action to configure the token client options.</param>
         /// <param name="builderAction">
         /// An optional action used to configure the <see cref="IHttpClientBuilder"/> instance that is returned
         /// when the <see cref="ITokenClient"/> implementation is registered in the service collection via the
@@ -29,16 +25,12 @@ namespace AccessTokenClient.Extensions
         /// errors that may be encountered. 
         /// </param>
         /// <returns>The service collection instance.</returns>
-        public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<TokenClientOptions> action = null, Action<IHttpClientBuilder> builderAction = null)
+        public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<IHttpClientBuilder> builderAction = null)
         {
             if (services == null)
             {
                 throw new ArgumentNullException(nameof(services));
             }
-
-            var options = new TokenClientOptions();
-
-            action?.Invoke(options);
 
             services.TryAddSingleton<IResponseDeserializer, ResponseDeserializer>();
 
@@ -46,16 +38,44 @@ namespace AccessTokenClient.Extensions
 
             builderAction?.Invoke(httpClientBuilder);
 
-            if (options.EnableCaching)
+            return services;
+        }
+
+        /// <summary>
+        /// Enables caching for the token client.
+        /// </summary>
+        /// <typeparam name="T">
+        /// An implementation of the <see cref="ITokenResponseCache"/> interface to register.
+        /// </typeparam>
+        /// <param name="services">The service collection.</param>
+        /// <param name="action">An optional action used to configure the token client cache options.</param>
+        /// <returns>The service collection instance.</returns>
+        public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions> action = null) where T : ITokenResponseCache
+        {
+            if (services == null)
             {
-                services.TryAddSingleton<IExpirationCalculator, DefaultExpirationCalculator>();
-                services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
-                services.TryAddSingleton<ITokenResponseCache, MemoryTokenResponseCache>();
-                services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
-                services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
+                throw new ArgumentNullException(nameof(services));
             }
 
-            services.TryDecorate<ITokenClient, TokenClientValidationDecorator>();
+            var options = new TokenClientCacheOptions();
+            action?.Invoke(options);
+
+            if(options.ExpirationBuffer <= 0)
+            {
+                throw new ArgumentException("The expiration buffer must be greater than 0.");
+            }
+
+            if(string.IsNullOrWhiteSpace(options.CacheKeyPrefix))
+            {
+                throw new ArgumentException("A cache key prefix must be specified.");
+            }
+
+            services.TryAddSingleton(options);
+            services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
+            services.TryAddSingleton(typeof(ITokenResponseCache), typeof(T));
+            services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
+
+            services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
 
             return services;
         }

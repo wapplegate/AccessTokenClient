@@ -1,8 +1,6 @@
-﻿using AccessTokenClient.Expiration;
-using AccessTokenClient.Keys;
-using AccessTokenClient.Transformation;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using System;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace AccessTokenClient.Caching
@@ -18,11 +16,11 @@ namespace AccessTokenClient.Caching
 
         private readonly ITokenClient decoratedClient;
 
+        private readonly TokenClientCacheOptions options;
+
         private readonly ITokenResponseCache cache;
 
         private readonly IKeyGenerator keyGenerator;
-
-        private readonly IExpirationCalculator calculator;
 
         private readonly IAccessTokenTransformer transformer;
 
@@ -31,17 +29,17 @@ namespace AccessTokenClient.Caching
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="decoratedClient">The decorated instance.</param>
+        /// <param name="options">The token client cache options.</param>
         /// <param name="cache">The token response cache.</param>
         /// <param name="keyGenerator">The key generator.</param>
-        /// <param name="calculator">The expiration calculator.</param>
         /// <param name="transformer">The access token transformer.</param>
-        public TokenClientCachingDecorator(ILogger<TokenClientCachingDecorator> logger, ITokenClient decoratedClient, ITokenResponseCache cache, IKeyGenerator keyGenerator, IExpirationCalculator calculator, IAccessTokenTransformer transformer)
+        public TokenClientCachingDecorator(ILogger<TokenClientCachingDecorator> logger, ITokenClient decoratedClient, TokenClientCacheOptions options, ITokenResponseCache cache, IKeyGenerator keyGenerator, IAccessTokenTransformer transformer)
         {
             this.logger          = logger          ?? throw new ArgumentNullException(nameof(logger));
             this.decoratedClient = decoratedClient ?? throw new ArgumentNullException(nameof(decoratedClient));
+            this.options         = options         ?? throw new ArgumentNullException(nameof(options));
             this.cache           = cache           ?? throw new ArgumentNullException(nameof(cache));
             this.keyGenerator    = keyGenerator    ?? throw new ArgumentNullException(nameof(keyGenerator));
-            this.calculator      = calculator      ?? throw new ArgumentNullException(nameof(calculator));
             this.transformer     = transformer     ?? throw new ArgumentNullException(nameof(transformer));
         }
 
@@ -50,57 +48,57 @@ namespace AccessTokenClient.Caching
         /// </summary>
         /// <param name="request">The token request.</param>
         /// <param name="execute">An optional execute function that will override the default request implementation.</param>
+        /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken cancellationToken = default)
         {
-            var key = keyGenerator.GenerateTokenRequestKey(request);
+            TokenRequestValidator.EnsureRequestIsValid(request);
 
-            logger.LogInformation("Checking if token response with key '{Key}' exists in the token cache.", key);
+            cancellationToken.ThrowIfCancellationRequested();
 
-            if (await cache.KeyExists(key))
+            var key = keyGenerator.GenerateTokenRequestKey(request, options.CacheKeyPrefix);
+
+            logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
+
+            var cachedTokenResponse = await cache.Get(key, cancellationToken);
+
+            if (cachedTokenResponse != null)
             {
-                logger.LogInformation("Token response with key '{Key}' exists in the token cache.", key);
+                logger.LogInformation("Successfully retrieved the token response with key '{Key}' from the cache.", key);
 
-                var getResult = await cache.Get(key);
+                cachedTokenResponse.AccessToken = transformer.Revert(cachedTokenResponse.AccessToken);
 
-                if (getResult.Successful && getResult.Value != null)
-                {
-                    logger.LogInformation("Successfully retrieved token response with key '{Key}' from the token cache successfully.", key);
-
-                    getResult.Value.AccessToken = transformer.Revert(getResult.Value.AccessToken);
-
-                    return getResult.Value;
-                }
-
-                logger.LogWarning("Unable to retrieve token response with key '{Key}' from the token cache.", key);
+                return cachedTokenResponse;
             }
 
-            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute);
+            logger.LogInformation("Token response with key '{Key}' does not exist in the cache.", key);
 
-            await CacheTokenResponse(key, tokenResponse);
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, execute, cancellationToken);
+
+            await CacheTokenResponse(key, tokenResponse, cancellationToken);
 
             return tokenResponse;
         }
 
-        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse)
+        private async Task CacheTokenResponse(string key, TokenResponse tokenResponse, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Attempting to store token response with key '{Key}' in the token cache.", key);
+            logger.LogInformation("Attempting to store token response with key '{Key}' in the cache.", key);
 
-            var expirationTimeSpan = calculator.CalculateExpiration(tokenResponse);
+            var expirationTimeSpan = TimeSpan.FromMinutes(tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer);
 
             var accessTokenValue = tokenResponse.AccessToken;
 
             tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
 
-            var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan);
+            var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, cancellationToken);
 
             if (tokenStoredSuccessfully)
             {
-                logger.LogInformation("Successfully stored token response with key '{Key}' in the token cache.", key);
+                logger.LogInformation("Successfully stored token response with key '{Key}' in the cache.", key);
             }
             else
             {
-                logger.LogWarning("Unable to store token response with key '{Key}' in the token cache.", key);
+                logger.LogWarning("Unable to store token response with key '{Key}' in the cache.", key);
             }
 
             tokenResponse.AccessToken = accessTokenValue;

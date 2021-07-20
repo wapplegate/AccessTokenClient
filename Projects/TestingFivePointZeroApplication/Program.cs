@@ -10,7 +10,6 @@ namespace TestingFivePointZeroApplication
     {
         public static void Main(string[] args)
         {
-
             Log.Logger = new LoggerConfiguration()
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .Enrich.FromLogContext()
@@ -19,7 +18,7 @@ namespace TestingFivePointZeroApplication
 
             try
             {
-                Log.Information("Starting the web host.");
+                Log.Information("Starting the host...");
                 CreateHostBuilder(args).Build().Run();
             }
             catch (Exception ex)
