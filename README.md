@@ -119,11 +119,14 @@ public class TestClient
             Scopes           = options.Scopes
         });
 
-        httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue($"Bearer {tokenResponse.AccessToken}");
+        using (var requestMessage = new HttpRequestMessage(HttpMethod.Get, "https://test.com/data"))
+        {
+            requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
 
-        var response = await httpClient.GetAsync("https://test.com/data");
-
-        return await response.Content.ReadAsStringAsync();
+            var response = await httpClient.SendAsync(requestMessage);
+            
+            return await response.Content.ReadAsStringAsync();
+        }
     }
 }
 
@@ -145,7 +148,7 @@ Options and the token client need to be injected into the `TestClient`. The `Req
 services.AddHttpClient<TestClient>().AddClientAccessTokenHandler<TestClientTokenOptions>();
 ```
 
-The handler will request then add an access token to outgoing requests from the `TestClient` class. Now the `TestClient` can be simplified as shown below.
+The handler will request and then add an access token to all outgoing requests from the `TestClient` class. Now the `TestClient` can be simplified as shown below.
 
 ```csharp
 public class TestClient
