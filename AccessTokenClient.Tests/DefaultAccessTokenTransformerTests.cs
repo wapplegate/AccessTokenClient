@@ -1,5 +1,5 @@
-﻿using AccessTokenClient.Tests.Helpers;
-using AccessTokenClient.Transformation;
+﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Xunit;
 

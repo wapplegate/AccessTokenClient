@@ -14,12 +14,6 @@ namespace AccessTokenClient
         public string AccessToken { get; set; }
 
         /// <summary>
-        /// Gets or sets the token type.
-        /// </summary>
-        [JsonPropertyName("token_type")]
-        public string TokenType { get; set; }
-
-        /// <summary>
         /// Gets or sets the expiration for the token in seconds.
         /// </summary>
         [JsonPropertyName("expires_in")]

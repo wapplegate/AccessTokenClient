@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace AccessTokenClient.Tests.Helpers
 {
-    public class MockHttpMessageHandler : HttpMessageHandler
+    public class MockHttpMessageHandler : DelegatingHandler
     {
         private readonly HttpStatusCode httpStatusCode;
 
