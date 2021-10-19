@@ -245,7 +245,7 @@ namespace AccessTokenClient.Tests
                 return response;
             };
 
-            creationAction.Should().Throw<OperationCanceledException>();
+            creationAction.Should().ThrowAsync<OperationCanceledException>();
         }
 
         [Fact]

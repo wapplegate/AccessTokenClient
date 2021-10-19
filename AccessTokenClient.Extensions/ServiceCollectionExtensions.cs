@@ -60,12 +60,12 @@ namespace AccessTokenClient.Extensions
             var options = new TokenClientCacheOptions();
             action?.Invoke(options);
 
-            if(options.ExpirationBuffer <= 0)
+            if (options.ExpirationBuffer <= 0)
             {
                 throw new ArgumentException("The expiration buffer must be greater than 0.");
             }
 
-            if(string.IsNullOrWhiteSpace(options.CacheKeyPrefix))
+            if (string.IsNullOrWhiteSpace(options.CacheKeyPrefix))
             {
                 throw new ArgumentException("A cache key prefix must be specified.");
             }
