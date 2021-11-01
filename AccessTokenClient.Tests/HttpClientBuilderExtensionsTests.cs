@@ -1,7 +1,6 @@
 ﻿using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using System.Net.Http;
 using Xunit;
 
 namespace AccessTokenClient.Tests

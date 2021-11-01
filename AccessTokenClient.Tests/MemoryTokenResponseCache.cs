@@ -2,8 +2,6 @@
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
-using System;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace AccessTokenClient.Tests

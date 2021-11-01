@@ -1,7 +1,6 @@
 ﻿using AccessTokenClient.Caching;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
-using System;
 using Xunit;
 
 namespace AccessTokenClient.Tests

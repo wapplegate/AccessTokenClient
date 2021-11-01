@@ -4,9 +4,7 @@ using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System;
 using System.Net;
-using System.Threading.Tasks;
 using Xunit;
 
 namespace AccessTokenClient.Tests
