@@ -1,42 +1,41 @@
 ﻿using System.Net;
 
-namespace AccessTokenClient.Tests.Helpers
+namespace AccessTokenClient.Tests.Helpers;
+
+public class MockHttpMessageHandler : DelegatingHandler
 {
-    public class MockHttpMessageHandler : DelegatingHandler
+    private readonly HttpStatusCode httpStatusCode;
+
+    private readonly string response;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="MockHttpMessageHandler" /> class.
+    /// </summary>
+    /// <param name="response">The response mock response to use.</param>
+    /// <param name="httpStatusCode">The HTTP status code to return.</param>
+    public MockHttpMessageHandler(string response, HttpStatusCode httpStatusCode)
     {
-        private readonly HttpStatusCode httpStatusCode;
+        this.response       = response;
+        this.httpStatusCode = httpStatusCode;
+    }
 
-        private readonly string response;
+    public string? Input { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MockHttpMessageHandler" /> class.
-        /// </summary>
-        /// <param name="response">The response mock response to use.</param>
-        /// <param name="httpStatusCode">The HTTP status code to return.</param>
-        public MockHttpMessageHandler(string response, HttpStatusCode httpStatusCode)
+    public int NumberOfCalls { get; private set; }
+
+    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+    {
+        NumberOfCalls++;
+
+        if (request.Content != null)
         {
-            this.response       = response;
-            this.httpStatusCode = httpStatusCode;
+            Input = await request.Content.ReadAsStringAsync(cancellationToken);
         }
 
-        public string Input { get; private set; }
-
-        public int NumberOfCalls { get; private set; }
-
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        return new HttpResponseMessage
         {
-            NumberOfCalls++;
-
-            if (request.Content != null)
-            {
-                Input = await request.Content.ReadAsStringAsync(cancellationToken);
-            }
-
-            return new HttpResponseMessage
-            {
-                StatusCode = httpStatusCode,
-                Content    = new StringContent(response)
-            };
-        }
+            StatusCode = httpStatusCode,
+            Content    = new StringContent(response)
+        };
     }
 }
