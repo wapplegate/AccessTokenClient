@@ -17,7 +17,7 @@ namespace AccessTokenClient.Caching
 
             var concatenatedRequest = GenerateConcatenatedRequest(request);
 
-            using var hasher = new SHA256Managed();
+            using var hasher = SHA256.Create();
             var textData = Encoding.UTF8.GetBytes(concatenatedRequest);
             var hash = hasher.ComputeHash(textData);
 

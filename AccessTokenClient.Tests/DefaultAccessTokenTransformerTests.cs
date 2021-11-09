@@ -3,32 +3,31 @@ using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Xunit;
 
-namespace AccessTokenClient.Tests
+namespace AccessTokenClient.Tests;
+
+public class DefaultAccessTokenTransformerTests
 {
-    public class DefaultAccessTokenTransformerTests
+    [Fact]
+    public void EnsureConvertedValueIsTheSameAsOriginal()
     {
-        [Fact]
-        public void EnsureConvertedValueIsTheSameAsOriginal()
-        {
-            const string Value = "test";
+        const string Value = "test";
 
-            var transformer = new DefaultAccessTokenTransformer();
-            var convertedValue = transformer.Convert(Value);
+        var transformer = new DefaultAccessTokenTransformer();
+        var convertedValue = transformer.Convert(Value);
 
-            convertedValue.ShouldNotBeNull();
-            convertedValue.Should().Be(Value);
-        }
+        convertedValue.ShouldNotBeNull();
+        convertedValue.Should().Be(Value);
+    }
 
-        [Fact]
-        public void EnsureRevertedValueIsTheSameAsOriginal()
-        {
-            const string Value = "test";
+    [Fact]
+    public void EnsureRevertedValueIsTheSameAsOriginal()
+    {
+        const string Value = "test";
 
-            var transformer = new DefaultAccessTokenTransformer();
-            var revertedValue = transformer.Revert(Value);
+        var transformer = new DefaultAccessTokenTransformer();
+        var revertedValue = transformer.Revert(Value);
 
-            revertedValue.ShouldNotBeNull();
-            revertedValue.Should().Be(Value);
-        }
+        revertedValue.ShouldNotBeNull();
+        revertedValue.Should().Be(Value);
     }
 }

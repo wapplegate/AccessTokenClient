@@ -23,7 +23,7 @@ namespace TestingThreePointOneApplication
         {
             services.AddMemoryCache();
 
-            services.AddAccessTokenClient(builderAction: builder =>
+            services.AddAccessTokenClient(builder =>
             {
                 builder.AddPolicyHandler((provider, _) =>
                 {

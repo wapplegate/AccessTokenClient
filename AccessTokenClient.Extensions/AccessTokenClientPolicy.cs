@@ -29,7 +29,7 @@ namespace AccessTokenClient.Extensions
             return HttpPolicyExtensions
                 .HandleTransientHttpError()
                 .OrResult(message => message.StatusCode == HttpStatusCode.NotFound)
-                .WaitAndRetryAsync(2, _ => TimeSpan.FromSeconds(1), (_, timespan, retryAttempt, _) =>
+                .WaitAndRetryAsync(2, _ => TimeSpan.FromSeconds(1), (_, timespan, retryAttempt, context) =>
                 {
                     logger?.LogWarning("Delaying for {delay}ms, then making retry attempt #{retry}.", timespan.TotalMilliseconds, retryAttempt);
                 });
