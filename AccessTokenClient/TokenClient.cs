@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Extensions;
+using AccessTokenClient.Extensions;
 using AccessTokenClient.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
@@ -82,7 +82,7 @@ namespace AccessTokenClient
                 throw new HttpRequestException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
             }
 
-            logger.LogInformation("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);
+            logger.LogDebug("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);
 
             return tokenResponse;
         }

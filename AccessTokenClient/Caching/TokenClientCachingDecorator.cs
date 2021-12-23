@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -58,20 +58,20 @@ namespace AccessTokenClient.Caching
 
             var key = keyGenerator.GenerateTokenRequestKey(request, options.CacheKeyPrefix);
 
-            logger.LogInformation("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
+            logger.LogDebug("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
 
             var cachedTokenResponse = await cache.Get(key, cancellationToken);
 
             if (cachedTokenResponse != null)
             {
-                logger.LogInformation("Successfully retrieved the token response with key '{Key}' from the cache.", key);
+                logger.LogDebug("Successfully retrieved the token response with key '{Key}' from the cache.", key);
 
                 cachedTokenResponse.AccessToken = transformer.Revert(cachedTokenResponse.AccessToken);
 
                 return cachedTokenResponse;
             }
 
-            logger.LogInformation("Token response with key '{Key}' does not exist in the cache.", key);
+            logger.LogDebug("Token response with key '{Key}' does not exist in the cache.", key);
 
             var tokenResponse = await decoratedClient.RequestAccessToken(request, execute, cancellationToken);
 
@@ -82,7 +82,7 @@ namespace AccessTokenClient.Caching
 
         private async Task CacheTokenResponse(string key, TokenResponse tokenResponse, CancellationToken cancellationToken)
         {
-            logger.LogInformation("Attempting to store token response with key '{Key}' in the cache.", key);
+            logger.LogDebug("Attempting to store token response with key '{Key}' in the cache.", key);
 
             var expirationTimeSpan = TimeSpan.FromMinutes(tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer);
 
@@ -94,7 +94,7 @@ namespace AccessTokenClient.Caching
 
             if (tokenStoredSuccessfully)
             {
-                logger.LogInformation("Successfully stored token response with key '{Key}' in the cache.", key);
+                logger.LogDebug("Successfully stored token response with key '{Key}' in the cache.", key);
             }
             else
             {
