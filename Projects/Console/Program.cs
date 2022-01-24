@@ -1,4 +1,4 @@
-﻿using AccessTokenClient;
+using AccessTokenClient;
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,7 +29,7 @@ namespace Console
 
             var provider = services.BuildServiceProvider();
 
-            var client = provider.GetService<ITokenClient>();
+            var client = provider.GetRequiredService<ITokenClient>();
 
             if (client != null)
             {

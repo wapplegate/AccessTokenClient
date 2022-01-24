@@ -1,8 +1,6 @@
-using AccessTokenClient.Serialization;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
-using Moq;
 using System.Net;
 using Xunit;
 
@@ -19,7 +17,7 @@ public class TokenClientUnitTests
         var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
         var httpClient = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -41,7 +39,7 @@ public class TokenClientUnitTests
         var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
         var httpClient     = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -51,22 +49,22 @@ public class TokenClientUnitTests
             Scopes           = new[] { "scope:read" }
         });
 
-        await function.Should().ThrowAsync<HttpRequestException>();
+        await function.Should().ThrowAsync<Exception>();
     }
 
-    [Fact]
-    public async Task EnsureExceptionThrownWhenServerErrorReturned()
+    [Theory]
+    [InlineData(HttpStatusCode.NotFound)]
+    [InlineData(HttpStatusCode.InternalServerError)]
+    [InlineData(HttpStatusCode.ServiceUnavailable)]
+    public async Task EnsureExceptionThrownWhenNonSuccessStatusCodeReturned(HttpStatusCode statusCode)
     {
         const string Response = "";
 
         var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.InternalServerError);
+        var messageHandler = new MockHttpMessageHandler(Response, statusCode);
         var httpClient = new HttpClient(messageHandler);
 
-        var mockDeserializer = new Mock<IResponseDeserializer>();
-        mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
-
-        var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -77,106 +75,6 @@ public class TokenClientUnitTests
         });
 
         await function.Should().ThrowAsync<HttpRequestException>();
-    }
-
-    [Fact]
-    public async Task EnsureExceptionThrownWhenDeserializerReturnsNullTokenResponse()
-    {
-        const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
-
-        var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
-        var httpClient = new HttpClient(messageHandler);
-
-        var mockDeserializer = new Mock<IResponseDeserializer>();
-        mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
-
-        var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
-
-        Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
-        {
-            TokenEndpoint    = "http://www.token-endpoint.com",
-            ClientIdentifier = "client-identifier",
-            ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
-        });
-
-        await function.Should().ThrowAsync<HttpRequestException>();
-    }
-
-    [Fact]
-    public async Task EnsureExceptionThrownWhenDeserializerReturnsEmptyAccessToken()
-    {
-        const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
-
-        var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
-        var httpClient = new HttpClient(messageHandler);
-
-        var mockDeserializer = new Mock<IResponseDeserializer>();
-        mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns(new TokenResponse
-        {
-            AccessToken = "",
-            ExpiresIn   = 3000
-        });
-
-        var tokenClient = new TokenClient(logger, httpClient, mockDeserializer.Object);
-
-        Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
-        {
-            TokenEndpoint    = "http://www.token-endpoint.com",
-            ClientIdentifier = "client-identifier",
-            ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
-        });
-
-        await function.Should().ThrowAsync<HttpRequestException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenLoggerIsNull()
-    {
-        var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
-        var httpClient = new HttpClient(messageHandler);
-        var mockDeserializer = new Mock<IResponseDeserializer>();
-        mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
-
-        Action action = () =>
-        {
-            var _ = new TokenClient(null, httpClient, new ResponseDeserializer());
-        };
-
-        action.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenClientIsNull()
-    {
-        var logger = new NullLogger<TokenClient>();
-        var mockDeserializer = new Mock<IResponseDeserializer>();
-        mockDeserializer.Setup(m => m.Deserialize(It.IsAny<string>())).Returns((TokenResponse)null);
-
-        Action action = () =>
-        {
-            var _ = new TokenClient(logger, null, new ResponseDeserializer());
-        };
-
-        action.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenDeserializerIsNull()
-    {
-        var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
-        var httpClient = new HttpClient(messageHandler);
-
-        Action action = () =>
-        {
-            var _ = new TokenClient(logger, httpClient, null);
-        };
-
-        action.Should().Throw<ArgumentNullException>();
     }
 
     [Fact]
@@ -190,7 +88,7 @@ public class TokenClientUnitTests
         var source = new CancellationTokenSource();
         source.Cancel();
             
-        var client = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var client = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () =>
         {
@@ -214,13 +112,13 @@ public class TokenClientUnitTests
     [InlineData(" ")]
     public async Task EnsureExceptionThrownWhenTokenEndpointNotSet(string tokenEndpoint)
     {
-        const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
+        var response = string.Empty;
 
         var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+        var messageHandler = new MockHttpMessageHandler(response, HttpStatusCode.OK);
         var httpClient = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -239,13 +137,13 @@ public class TokenClientUnitTests
     [InlineData(" ")]
     public async Task EnsureExceptionThrownWhenClientIdentifierNotSet(string clientIdentifier)
     {
-        const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
+        var response = string.Empty;
 
         var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+        var messageHandler = new MockHttpMessageHandler(response, HttpStatusCode.OK);
         var httpClient = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -264,13 +162,13 @@ public class TokenClientUnitTests
     [InlineData(" ")]
     public async Task EnsureExceptionThrownWhenClientSecretNotSet(string clientSecret)
     {
-        const string Response = @"{""access_token"":"",""token_type"":""Bearer"",""expires_in"":7199}";
+        var response = string.Empty;
 
         var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+        var messageHandler = new MockHttpMessageHandler(response, HttpStatusCode.OK);
         var httpClient = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
         {
@@ -292,7 +190,7 @@ public class TokenClientUnitTests
         var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
         var httpClient = new HttpClient(messageHandler);
 
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
         {

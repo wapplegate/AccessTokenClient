@@ -27,7 +27,7 @@ namespace TestingThreePointOneApplication
             {
                 builder.AddPolicyHandler((provider, _) =>
                 {
-                    var logger = provider.GetService<ILogger<ITokenClient>>();
+                    var logger = provider.GetRequiredService<ILogger<ITokenClient>>();
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
             })

@@ -1,5 +1,4 @@
-﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Serialization;
+using AccessTokenClient.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
@@ -31,8 +30,6 @@ namespace AccessTokenClient.Extensions
             {
                 throw new ArgumentNullException(nameof(services));
             }
-
-            services.TryAddSingleton<IResponseDeserializer, ResponseDeserializer>();
 
             var httpClientBuilder = services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
 

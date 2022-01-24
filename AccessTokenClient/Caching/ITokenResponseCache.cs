@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -15,7 +15,7 @@ namespace AccessTokenClient.Caching
         /// <param name="key">The cache key.</param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>A result containing the token response.</returns>
-        Task<TokenResponse> Get(string key, CancellationToken cancellationToken = default);
+        Task<TokenResponse?> Get(string key, CancellationToken cancellationToken = default);
 
         /// <summary>
         /// Sets a token response in the cache with the specified expiration.

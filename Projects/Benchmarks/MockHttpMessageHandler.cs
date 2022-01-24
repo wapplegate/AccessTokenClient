@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace AccessTokenClient.Tests.Helpers;
+namespace Benchmarks;
 
 public class MockHttpMessageHandler : DelegatingHandler
 {
@@ -15,7 +15,7 @@ public class MockHttpMessageHandler : DelegatingHandler
     /// <param name="httpStatusCode">The HTTP status code to return.</param>
     public MockHttpMessageHandler(string? response, HttpStatusCode httpStatusCode)
     {
-        this.response       = response;
+        this.response = response;
         this.httpStatusCode = httpStatusCode;
     }
 
@@ -35,7 +35,7 @@ public class MockHttpMessageHandler : DelegatingHandler
         return new HttpResponseMessage
         {
             StatusCode = httpStatusCode,
-            Content    = response != null ? new StringContent(response) : null
+            Content = response != null ? new StringContent(response) : null
         };
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,6 +18,6 @@ namespace AccessTokenClient
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken cancellationToken = default);
+        Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute = null, CancellationToken cancellationToken = default);
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace AccessTokenClient
+namespace AccessTokenClient
 {
     /// <summary>
     /// This class encapsulates the parameters that are
@@ -24,6 +24,6 @@
         /// <summary>
         /// Gets or sets the requested scopes.
         /// </summary>
-        public string[] Scopes { get; set; }
+        public string[] Scopes { get; set; } = {};
     }
 }

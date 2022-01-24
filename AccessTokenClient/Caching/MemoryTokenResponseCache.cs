@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -23,13 +23,13 @@ namespace AccessTokenClient.Caching
         }
 
         /// <inheritdoc />
-        public Task<TokenResponse> Get(string key, CancellationToken cancellationToken = default)
+        public Task<TokenResponse?> Get(string key, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var exists = cache.TryGetValue<TokenResponse>(key, out var cachedTokenResponse);
+            var exists = cache.TryGetValue<TokenResponse?>(key, out var cachedTokenResponse);
 
-            return !exists ? Task.FromResult<TokenResponse>(null) : Task.FromResult(cachedTokenResponse);
+            return !exists ? Task.FromResult<TokenResponse?>(null) : Task.FromResult(cachedTokenResponse);
         }
 
         /// <inheritdoc />

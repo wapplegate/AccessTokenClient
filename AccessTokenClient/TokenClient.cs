@@ -1,8 +1,11 @@
-using AccessTokenClient.Extensions;
-using AccessTokenClient.Serialization;
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Text.Json;
+#if NET6_0_OR_GREATER
+using System.Text.Json.Serialization;
+#endif
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -18,19 +21,15 @@ namespace AccessTokenClient
 
         private readonly HttpClient client;
 
-        private readonly IResponseDeserializer deserializer;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="TokenClient"/> class.
         /// </summary>
         /// <param name="logger">The logger.</param>
         /// <param name="client">The http client.</param>
-        /// <param name="deserializer">The response deserializer.</param>
-        public TokenClient(ILogger<TokenClient> logger, HttpClient client, IResponseDeserializer deserializer)
+        public TokenClient(ILogger<TokenClient> logger, HttpClient client)
         {
-            this.logger       = logger       ?? throw new ArgumentNullException(nameof(logger));
-            this.client       = client       ?? throw new ArgumentNullException(nameof(client));
-            this.deserializer = deserializer ?? throw new ArgumentNullException(nameof(deserializer));
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            this.client = client ?? throw new ArgumentNullException(nameof(client));
         }
 
         /// <summary>
@@ -42,7 +41,7 @@ namespace AccessTokenClient
         /// </param>
         /// <param name="cancellationToken">The cancellation token.</param>
         /// <returns>The token response.</returns>
-        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute = null, CancellationToken cancellationToken = default)
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute = null, CancellationToken cancellationToken = default)
         {
             TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -61,21 +60,62 @@ namespace AccessTokenClient
             }
         }
 
-        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>> execute, CancellationToken cancellationToken)
+        private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute, CancellationToken cancellationToken)
         {
             if (execute != null)
             {
                 return await execute(request);
             }
 
-            var content = await client.ExecuteClientCredentialsTokenRequest(request, cancellationToken);
+            TokenRequestValidator.EnsureRequestIsValid(request);
 
-            if (string.IsNullOrWhiteSpace(content))
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var uri = new Uri(request.TokenEndpoint);
+
+            var scopes = request.Scopes != null ? string.Join(" ", request.Scopes) : string.Empty;
+
+            var content = new FormUrlEncodedContent(new[]
             {
-                throw new HttpRequestException($"A null or empty response was returned from token endpoint '{request.TokenEndpoint}'.");
+                new KeyValuePair<string, string>("client_id",     request.ClientIdentifier),
+                new KeyValuePair<string, string>("client_secret", request.ClientSecret),
+                new KeyValuePair<string, string>("grant_type",    "client_credentials"),
+                new KeyValuePair<string, string>("scope",         scopes)
+            });
+
+            var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
+
+            var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
+
+            if (!responseMessage.IsSuccessStatusCode)
+            {
+                var statusCode = (int)responseMessage.StatusCode;
+
+                throw new HttpRequestException($"The token request failed with status code {statusCode}.");
             }
 
-            var tokenResponse = deserializer.Deserialize(content);
+#if NET6_0_OR_GREATER
+            var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
+
+            var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.TokenResponse, cancellationToken);
+#endif
+
+#if NET5_0
+            var responseContent = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
+
+            var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseContent);
+#endif
+
+#if NETCOREAPP3_1
+            var responseContent = await responseMessage.Content.ReadAsStringAsync();
+
+            var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(responseContent);
+#endif
+
+            if (tokenResponse == null)
+            {
+                throw new InvalidOperationException("The token response was not deserialized successfully.");
+            }
 
             if (!TokenResponseValid(tokenResponse))
             {
@@ -87,9 +127,16 @@ namespace AccessTokenClient
             return tokenResponse;
         }
 
-        private static bool TokenResponseValid(TokenResponse response)
+        private static bool TokenResponseValid(TokenResponse? response)
         {
             return response != null && !string.IsNullOrWhiteSpace(response.AccessToken);
         }
     }
+
+#if NET6_0_OR_GREATER
+    [JsonSerializable(typeof(TokenResponse))]
+    public partial class TokenResponseJsonContext : JsonSerializerContext
+    {
+    }
+#endif
 }
