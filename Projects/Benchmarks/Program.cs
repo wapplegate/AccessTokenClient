@@ -3,6 +3,7 @@ using AccessTokenClient;
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,6 +13,8 @@ namespace Benchmarks;
 public class Program
 {
     [MemoryDiagnoser]
+    [SimpleJob(RuntimeMoniker.Net50, baseline: true)]
+    [SimpleJob(RuntimeMoniker.Net60)]
     public class AccessTokenClientBenchmarks
     {
         private readonly ITokenClient client;
@@ -42,7 +45,7 @@ public class Program
             client = services.BuildServiceProvider().GetRequiredService<ITokenClient>();
         }
 
-        [Benchmark(Baseline = true)]
+        [Benchmark]
         public async Task<TokenResponse> GetAccessToken()
         {
             return await client.RequestAccessToken(new TokenRequest
