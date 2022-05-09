@@ -24,7 +24,7 @@ public static class AccessTokenClientPolicy
     /// (5XX and 408) as well as when a 404 is encountered. The request will be retried
     /// twice, with a 1 second wait time between retries.
     /// </returns>
-    public static IAsyncPolicy<HttpResponseMessage> GetDefaultRetryPolicy(ILogger<ITokenClient> logger = null)
+    public static IAsyncPolicy<HttpResponseMessage> GetDefaultRetryPolicy(ILogger<ITokenClient>? logger = null)
     {
         return HttpPolicyExtensions
             .HandleTransientHttpError()

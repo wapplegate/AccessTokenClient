@@ -17,17 +17,17 @@ public static class TokenRequestValidator
     {
         if (string.IsNullOrWhiteSpace(request.TokenEndpoint))
         {
-            throw new ArgumentNullException(nameof(request.TokenEndpoint));
+            throw new ArgumentException("A token endpoint must be specified.");
         }
 
         if (string.IsNullOrWhiteSpace(request.ClientIdentifier))
         {
-            throw new ArgumentNullException(nameof(request.ClientIdentifier));
+            throw new ArgumentException("A client identifier must be specified.");
         }
 
         if (string.IsNullOrWhiteSpace(request.ClientSecret))
         {
-            throw new ArgumentNullException(nameof(request.ClientSecret));
+            throw new ArgumentException("A client secret must be specified.");
         }
     }
 }

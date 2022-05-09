@@ -47,7 +47,7 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="action">An optional action used to configure the token client cache options.</param>
     /// <returns>The service collection instance.</returns>
-    public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions> action = null) where T : ITokenResponseCache
+    public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions>? action = null) where T : ITokenResponseCache
     {
         if (services == null)
         {

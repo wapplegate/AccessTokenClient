@@ -128,7 +128,7 @@ public class TokenClientUnitTests
             Scopes           = new[] { "scope:read" }
         });
 
-        await function.Should().ThrowAsync<ArgumentNullException>();
+        await function.Should().ThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -153,7 +153,7 @@ public class TokenClientUnitTests
             Scopes           = new[] { "scope:read" }
         });
 
-        await function.Should().ThrowAsync<ArgumentNullException>();
+        await function.Should().ThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -178,7 +178,7 @@ public class TokenClientUnitTests
             Scopes           = new[] { "scope:read" }
         });
 
-        await function.Should().ThrowAsync<ArgumentNullException>();
+        await function.Should().ThrowAsync<ArgumentException>();
     }
 
     [Fact]
