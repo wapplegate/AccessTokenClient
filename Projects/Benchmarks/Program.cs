@@ -13,8 +13,7 @@ namespace Benchmarks;
 public class Program
 {
     [MemoryDiagnoser]
-    [SimpleJob(RuntimeMoniker.Net50, baseline: true)]
-    [SimpleJob(RuntimeMoniker.Net60)]
+    [SimpleJob(RuntimeMoniker.Net60, baseline: true)]
     public class AccessTokenClientBenchmarks
     {
         private readonly ITokenClient client;
