@@ -1,3 +1,8 @@
+using AccessTokenClient;
+using AccessTokenClient.Caching;
+using AccessTokenClient.Extensions;
+using TestingSixPointZeroApplication.Controllers;
+
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
@@ -6,6 +11,34 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new() { Title = "TestingSixPointZeroApplication", Version = "v1" });
 });
+
+builder.Services.AddMemoryCache();
+
+builder.Services.AddAccessTokenClient(httpClientBuilder =>
+{
+    httpClientBuilder.AddPolicyHandler((provider, _) =>
+    {
+        var logger = provider.GetService<ILogger<ITokenClient>>();
+        return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
+    });
+})
+.AddAccessTokenClientCache<MemoryTokenResponseCache>(options =>
+{
+    options.ExpirationBuffer = 5;
+    options.CacheKeyPrefix = "AccessTokenClient";
+});
+
+builder.Services.AddSingleton(new TestingClientOptions
+{
+    TokenEndpoint    = "https://localhost:44303/connect/token",
+    ClientIdentifier = "testing_client_identifier",
+    ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
+    Scopes           = new[] { "employee:read" }
+});
+
+builder.Services
+    .AddHttpClient<ITestingClient, TestingClient>()
+    .AddClientAccessTokenHandler<TestingClientOptions>();
 
 var app = builder.Build();
 

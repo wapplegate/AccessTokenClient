@@ -24,7 +24,7 @@ public static class ServiceCollectionExtensions
     /// errors that may be encountered. 
     /// </param>
     /// <returns>The service collection instance.</returns>
-    public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<IHttpClientBuilder> builderAction = null)
+    public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<IHttpClientBuilder>? builderAction = null)
     {
         if (services == null)
         {
