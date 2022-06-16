@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Xunit;
@@ -44,7 +44,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentNullException>();
+        action.Should().Throw<ArgumentException>();
     }
 
     [Theory]
@@ -65,7 +65,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentNullException>();
+        action.Should().Throw<ArgumentException>();
     }
 
     [Theory]
@@ -86,7 +86,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentNullException>();
+        action.Should().Throw<ArgumentException>();
     }
 
     [Fact]

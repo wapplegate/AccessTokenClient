@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
@@ -29,7 +29,7 @@ public class AccessTokenClientRetryIntegrationTests
                 // Add the default retry policy:
                 builder.AddPolicyHandler((provider, _) =>
                 {
-                    var logger = provider.GetService<ILogger<ITokenClient>>();
+                    var logger = provider.GetRequiredService<ILogger<ITokenClient>>();
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
 
@@ -38,16 +38,16 @@ public class AccessTokenClientRetryIntegrationTests
             })
             .AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
-        var client = services.BuildServiceProvider().GetService<ITokenClient>();
+        var client = services.BuildServiceProvider().GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
 
         Func<Task> func = async () => await client.RequestAccessToken(new TokenRequest
         {
-            TokenEndpoint = "https://service/token",
+            TokenEndpoint    = "https://service/token",
             ClientIdentifier = "client-identifier",
-            ClientSecret = "client-secret",
-            Scopes = new[]
+            ClientSecret     = "client-secret",
+            Scopes           = new[]
             {
                 "scope:read", "scope:create", "scope:edit", "scope:delete"
             }

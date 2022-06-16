@@ -1,5 +1,4 @@
-﻿using AccessTokenClient.Extensions;
-using AccessTokenClient.Serialization;
+using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
@@ -35,16 +34,16 @@ public class TokenClientRetryTests
             .CreateClient("TestingClient");
 
         var logger = provider.GetRequiredService<ILogger<TokenClient>>();
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         try
         {
             await tokenClient.RequestAccessToken(new TokenRequest
             {
-                TokenEndpoint = "http://www.token-endpoint.com",
+                TokenEndpoint    = "http://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
-                ClientSecret = "client-secret",
-                Scopes = new[] { "scope:read" }
+                ClientSecret     = "client-secret",
+                Scopes           = new[] { "scope:read" }
             });
         }
         catch
@@ -86,16 +85,16 @@ public class TokenClientRetryTests
             .CreateClient("TestingClient");
 
         var logger = provider.GetRequiredService<ILogger<TokenClient>>();
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         try
         {
             await tokenClient.RequestAccessToken(new TokenRequest
             {
-                TokenEndpoint = "http://www.token-endpoint.com",
+                TokenEndpoint    = "http://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
-                ClientSecret = "client-secret",
-                Scopes = new[] { "scope:read" }
+                ClientSecret     = "client-secret",
+                Scopes           = new[] { "scope:read" }
             });
         }
         catch

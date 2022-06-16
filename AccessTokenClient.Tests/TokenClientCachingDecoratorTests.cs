@@ -1,5 +1,4 @@
-﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Serialization;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
@@ -37,7 +36,7 @@ public class TokenClientCachingDecoratorTests
         var mockTransformer = new Mock<IAccessTokenTransformer>();
 
         // Set-up the access token client, token client, and the caching decorator:
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         ITokenClient cachingDecorator = new TokenClientCachingDecorator(
             decoratorLogger,
@@ -83,7 +82,7 @@ public class TokenClientCachingDecoratorTests
         var mockTransformer = new Mock<IAccessTokenTransformer>();
 
         // Set-up the token client and the caching decorator:
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         ITokenClient cachingDecorator = new TokenClientCachingDecorator(
             decoratorLogger,
@@ -127,7 +126,7 @@ public class TokenClientCachingDecoratorTests
 
         cacheMock
             .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync((TokenResponse)null);
+            .ReturnsAsync((TokenResponse?)null);
 
         cacheMock
             .Setup(m => m.Set(It.IsAny<string>(),It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
@@ -140,7 +139,7 @@ public class TokenClientCachingDecoratorTests
         var mockTransformer = new Mock<IAccessTokenTransformer>();
 
         // Set-up the token client and the caching decorator:
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         ITokenClient cachingDecorator = new TokenClientCachingDecorator(
             decoratorLogger,
@@ -188,7 +187,7 @@ public class TokenClientCachingDecoratorTests
         var mockTransformer = new Mock<IAccessTokenTransformer>();
 
         // Set-up the token client and the caching decorator:
-        var tokenClient = new TokenClient(logger, httpClient, new ResponseDeserializer());
+        var tokenClient = new TokenClient(logger, httpClient);
 
         var cachingDecorator = new TokenClientCachingDecorator(
             decoratorLogger,
@@ -224,7 +223,7 @@ public class TokenClientCachingDecoratorTests
 
             var decorator = new TokenClientCachingDecorator(
                 new NullLogger<TokenClientCachingDecorator>(),
-                new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
+                new TokenClient(new NullLogger<TokenClient>(), new HttpClient()),
                 new TokenClientCacheOptions(),
                 new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
                 new TokenRequestKeyGenerator(),
@@ -242,89 +241,5 @@ public class TokenClientCachingDecoratorTests
         };
 
         creationAction.Should().ThrowAsync<OperationCanceledException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenLoggerIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            null,
-            new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
-            new TokenClientCacheOptions(),
-            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
-            new TokenRequestKeyGenerator(),
-            new DefaultAccessTokenTransformer());
-
-        creationAction.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenTokenClientIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            new NullLogger<TokenClientCachingDecorator>(),
-            null,
-            new TokenClientCacheOptions(),
-            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
-            new TokenRequestKeyGenerator(),
-            new DefaultAccessTokenTransformer());
-
-        creationAction.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenTokenClientCacheOptionsIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            new NullLogger<TokenClientCachingDecorator>(),
-            new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
-            null,
-            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
-            new TokenRequestKeyGenerator(),
-            new DefaultAccessTokenTransformer());
-
-        creationAction.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenTokenResponseCacheIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            new NullLogger<TokenClientCachingDecorator>(),
-            new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
-            new TokenClientCacheOptions(),
-            null,
-            new TokenRequestKeyGenerator(),
-            new DefaultAccessTokenTransformer());
-
-        creationAction.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenKeyGeneratorIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            new NullLogger<TokenClientCachingDecorator>(),
-            new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
-            new TokenClientCacheOptions(),
-            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
-            null,
-            new DefaultAccessTokenTransformer());
-
-        creationAction.Should().Throw<ArgumentNullException>();
-    }
-
-    [Fact]
-    public void EnsureExceptionThrownWhenTransformerIsNull()
-    {
-        Func<TokenClientCachingDecorator> creationAction = () => new TokenClientCachingDecorator(
-            new NullLogger<TokenClientCachingDecorator>(),
-            new TokenClient(new NullLogger<TokenClient>(), new HttpClient(), new ResponseDeserializer()),
-            new TokenClientCacheOptions(),
-            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
-            new TokenRequestKeyGenerator(),
-            null);
-
-        creationAction.Should().Throw<ArgumentNullException>();
     }
 }

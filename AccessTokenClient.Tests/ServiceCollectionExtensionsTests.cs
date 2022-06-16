@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Caching;
+using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using FluentAssertions;
@@ -21,7 +21,7 @@ public class ServiceCollectionExtensionsTests
 
         var provider = services.BuildServiceProvider();
 
-        var client = provider.GetService<ITokenClient>();
+        var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
         client.Should().BeOfType<TokenClientCachingDecorator>();
@@ -40,7 +40,7 @@ public class ServiceCollectionExtensionsTests
 
         var provider = services.BuildServiceProvider();
 
-        var client = provider.GetService<ITokenClient>();
+        var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
         client.Should().BeOfType<TokenClient>();
@@ -57,14 +57,14 @@ public class ServiceCollectionExtensionsTests
         {
             builder.AddPolicyHandler((p, _) =>
             {
-                var logger = p.GetService<ILogger<ITokenClient>>();
+                var logger = p.GetRequiredService<ILogger<ITokenClient>>();
                 return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
             });
         });
 
         var provider = services.BuildServiceProvider();
 
-        var client = provider.GetService<ITokenClient>();
+        var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
         client.Should().BeOfType<TokenClient>();
@@ -81,7 +81,7 @@ public class ServiceCollectionExtensionsTests
 
         var provider = services.BuildServiceProvider();
 
-        var client = provider.GetService<ITokenClient>();
+        var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
         client.Should().BeOfType<TokenClient>();
@@ -112,8 +112,7 @@ public class ServiceCollectionExtensionsTests
     {
         IServiceCollection? services = null;
 
-        // ReSharper disable once ExpressionIsAlwaysNull
-        Action action = () => services.AddAccessTokenClient();
+        Action action = () => services!.AddAccessTokenClient();
 
         action.Should().Throw<ArgumentNullException>();
     }
@@ -123,8 +122,7 @@ public class ServiceCollectionExtensionsTests
     {
         IServiceCollection? services = null;
 
-        // ReSharper disable once ExpressionIsAlwaysNull
-        Action action = () => services.AddAccessTokenClientCache<MemoryTokenResponseCache>();
+        Action action = () => services!.AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
         action.Should().Throw<ArgumentNullException>();
     }

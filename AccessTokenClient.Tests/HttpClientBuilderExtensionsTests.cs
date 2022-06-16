@@ -1,4 +1,4 @@
-﻿using AccessTokenClient.Extensions;
+using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Xunit;
@@ -22,7 +22,7 @@ public class HttpClientBuilderExtensionsTests
 
         var provider = services.BuildServiceProvider();
 
-        var client = provider.GetService<TestClient>();
+        var client = provider.GetRequiredService<TestClient>();
 
         client.ShouldNotBeNull();
     }
