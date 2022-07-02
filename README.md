@@ -57,7 +57,7 @@ services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCac
 });
 ```
 
-The `ExpirationBuffer` option allows an expiration buffer to be set in minutes. This buffer will reduce the time the access token is cached for to ensure the token is nto cached longer than its lifetime. By default the buffer is set to 5 minutes unless changed. The `CacheKeyPrefix` option allows a custom cache key prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
+The `ExpirationBuffer` option allows an expiration buffer to be set in minutes. This buffer will reduce the time the access token is cached for to ensure the token is not cached longer than its lifetime. By default the buffer is set to 5 minutes unless changed. The `CacheKeyPrefix` option allows a custom cache key prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
 
 ## Usage
 
