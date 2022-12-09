@@ -4,7 +4,7 @@ on:
   push:
     branches: ["development"]
   pull_request:
-    branches: [ "development" ]
+    branches: ["development"]
 
 jobs:
   build:
@@ -15,15 +15,12 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: 6.0.x
-    - name: Restore dependencies
+    - name: Restore
       run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-    - name: Package & Deploy
+    - name: Build, Test, Package, Deploy
       run: |
         dotnet build -c Release --no-restore
+        dotnet test --no-build --verbosity normal
         dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
         dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
         dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
