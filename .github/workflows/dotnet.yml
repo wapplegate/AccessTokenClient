@@ -23,6 +23,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
     - name: Package & Deploy
       run: |
+        dotnet build -c Release --no-restore
         dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
         dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
         dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
