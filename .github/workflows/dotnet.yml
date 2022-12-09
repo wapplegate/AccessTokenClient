@@ -19,7 +19,7 @@ jobs:
       run: dotnet restore
     - name: Build, Test, Package, Deploy
       run: |
-        dotnet build -c Release --no-restore
+        dotnet build
         dotnet test --no-build --verbosity normal
         dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
         dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
