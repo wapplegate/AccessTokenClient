@@ -2,7 +2,7 @@ using System.Text.Json.Serialization;
 
 namespace AccessTokenClient;
 
-[JsonSerializable(typeof(TokenResponse))]
+[JsonSerializable(typeof(TokenResponseHttp))]
 public partial class TokenResponseJsonContext : JsonSerializerContext
 {
 }

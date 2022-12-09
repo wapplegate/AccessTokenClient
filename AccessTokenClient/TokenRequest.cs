@@ -6,7 +6,7 @@ namespace AccessTokenClient;
 /// This class encapsulates the parameters that are
 /// necessary to make a client credentials token request. 
 /// </summary>
-public class TokenRequest
+public sealed class TokenRequest
 {
     /// <summary>
     /// Gets or sets the token endpoint URL.
