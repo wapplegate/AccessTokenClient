@@ -1,0 +1,28 @@
+name: development-build
+
+on:
+  push:
+    branches: ["development"]
+  pull_request:
+    branches: ["development"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v3
+      with:
+        dotnet-version: 6.0.x
+    - name: Restore
+      run: dotnet restore
+    - name: Build, Test, Package, Deploy
+      run: |
+        dotnet build
+        dotnet test --no-build --verbosity normal
+        dotnet build -c Release
+        dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
+        dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=4.0.0-rc${{github.run_number}}
+        dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
+        
