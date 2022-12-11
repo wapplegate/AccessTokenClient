@@ -10,7 +10,7 @@ namespace AccessTokenClient.Caching;
 /// and executing token requests using the decorated client instance to make token requests
 /// when a cached value does not exist.
 /// </summary>
-public class TokenClientCachingDecorator : ITokenClient
+public sealed class TokenClientCachingDecorator : ITokenClient
 {
     private readonly ILogger<TokenClientCachingDecorator> logger;
 
@@ -47,10 +47,9 @@ public class TokenClientCachingDecorator : ITokenClient
     /// Makes a token request to the specified endpoint and returns the response.
     /// </summary>
     /// <param name="request">The token request.</param>
-    /// <param name="execute">An optional execute function that will override the default request implementation.</param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The token response.</returns>
-    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute = null, CancellationToken cancellationToken = default)
+    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
     {
         TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -73,7 +72,7 @@ public class TokenClientCachingDecorator : ITokenClient
 
         logger.LogDebug("Token response with key '{Key}' does not exist in the cache.", key);
 
-        var tokenResponse = await decoratedClient.RequestAccessToken(request, execute, cancellationToken);
+        var tokenResponse = await decoratedClient.RequestAccessToken(request, cancellationToken);
 
         await CacheTokenResponse(key, tokenResponse, cancellationToken);
 

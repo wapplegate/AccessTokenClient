@@ -31,7 +31,7 @@ public class TokenRequestKeyGenerator : IKeyGenerator
         var tokenEndpoint    = request.TokenEndpoint;
         var clientIdentifier = request.ClientIdentifier;
         var clientSecret     = request.ClientSecret;
-        var scopes           = string.Join(",", request.Scopes.Select(s => s));
+        var scopes            = string.Join(",", request.Scopes.Select(s => s));
 
         var concatenated = $"{tokenEndpoint}:{clientIdentifier}:{clientSecret}:{scopes}";
 

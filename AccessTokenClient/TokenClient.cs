@@ -12,7 +12,7 @@ namespace AccessTokenClient;
 /// This class contains a method that requests an access token from a
 /// specified token endpoint using the client credentials oauth flow.
 /// </summary>
-public class TokenClient : ITokenClient
+public sealed class TokenClient : ITokenClient
 {
     private readonly ILogger<TokenClient> logger;
 
@@ -33,12 +33,9 @@ public class TokenClient : ITokenClient
     /// Executes a token request to the specified endpoint and returns the token response.
     /// </summary>
     /// <param name="request">The token request.</param>
-    /// <param name="execute">
-    /// An optional function that can be passed in to override the method that executes the token request.
-    /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The token response.</returns>
-    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute = null, CancellationToken cancellationToken = default)
+    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
     {
         TokenRequestValidator.EnsureRequestIsValid(request);
 
@@ -46,7 +43,7 @@ public class TokenClient : ITokenClient
         {
             logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
 
-            var tokenResponse = await ExecuteTokenRequest(request, execute, cancellationToken);
+            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken);
 
             return tokenResponse;
         }
@@ -57,13 +54,8 @@ public class TokenClient : ITokenClient
         }
     }
 
-    private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute, CancellationToken cancellationToken)
+    private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, CancellationToken cancellationToken)
     {
-        if (execute != null)
-        {
-            return await execute(request);
-        }
-
         TokenRequestValidator.EnsureRequestIsValid(request);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -93,25 +85,24 @@ public class TokenClient : ITokenClient
             
         var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
-        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.TokenResponse, cancellationToken);
+        var deserializedTokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.TokenResponseHttp, cancellationToken);
 
-        if (tokenResponse == null)
+        if (!TokenResponseValid(deserializedTokenResponse))
         {
-            throw new InvalidOperationException("The token response was not deserialized successfully.");
-        }
-
-        if (!TokenResponseValid(tokenResponse))
-        {
-            throw new HttpRequestException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
+            throw new HttpRequestException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}' or deserialization failed..");
         }
 
         logger.LogDebug("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);
 
-        return tokenResponse;
+        return new TokenResponse
+        {
+            AccessToken = deserializedTokenResponse.AccessToken,
+            ExpiresIn   = deserializedTokenResponse.ExpiresIn
+        };
     }
 
-    private static bool TokenResponseValid(TokenResponse? response)
+    private static bool TokenResponseValid(TokenResponseHttp? response)
     {
-        return response != null && !string.IsNullOrWhiteSpace(response.AccessToken);
+        return response != null && !string.IsNullOrWhiteSpace(response.AccessToken) && response.ExpiresIn > 0;
     }
 }
