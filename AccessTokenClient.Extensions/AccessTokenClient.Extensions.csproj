@@ -4,7 +4,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <EnablePackageValidation>true</EnablePackageValidation>
     <Nullable>enable</Nullable>
-    <Version>1.0.0</Version>
+    <Version>3.0.1</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>William Applegate</Authors>
     <Description>This package contains service collection extension methods to easily add the access token client to the service collection.</Description>
@@ -34,7 +34,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Scrutor" Version="3.2.1" />
+    <PackageReference Include="Scrutor" Version="4.2.0" />
   </ItemGroup>
 
   <ItemGroup>
