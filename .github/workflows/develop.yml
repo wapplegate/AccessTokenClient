@@ -1,10 +1,10 @@
-name: development-build
+name: develop-build-deploy
 
 on:
   push:
-    branches: ["development"]
+    branches: ["develop"]
   pull_request:
-    branches: ["development"]
+    branches: ["develop"]
 
 jobs:
   build:
@@ -14,7 +14,7 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v3
       with:
-        dotnet-version: 6.0.x
+        dotnet-version: 8.0.x
     - name: Restore
       run: dotnet restore
     - name: Build, Test, Package, Deploy
