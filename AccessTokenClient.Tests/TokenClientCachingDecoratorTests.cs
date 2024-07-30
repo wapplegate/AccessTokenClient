@@ -49,10 +49,10 @@ public class TokenClientCachingDecoratorTests
 
         var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
         {
-            TokenEndpoint    = "http://www.token-endpoint.com",
+            TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
         tokenResponse.ShouldNotBeNull();
@@ -73,7 +73,7 @@ public class TokenClientCachingDecoratorTests
 
         // Set-up the token response cache mock:
         var cacheMock = new Mock<ITokenResponseCache>();
-        cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null);
+        cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null!);
 
         // Set-up the key generator mock:
         var keyGeneratorMock = new Mock<IKeyGenerator>();
@@ -95,14 +95,14 @@ public class TokenClientCachingDecoratorTests
 
         var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
         {
-            TokenEndpoint    = "http://www.token-endpoint.com",
+            TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
         tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.ShouldNotBeNull();
+        tokenResponse.AccessToken!.ShouldNotBeNull();
         tokenResponse.AccessToken.Should().Be("1234567890");
 
         messageHandler.NumberOfCalls.Should().Be(1);
@@ -152,14 +152,14 @@ public class TokenClientCachingDecoratorTests
 
         var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
         {
-            TokenEndpoint    = "http://www.token-endpoint.com",
+            TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
         tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.ShouldNotBeNull();
+        tokenResponse.AccessToken!.ShouldNotBeNull();
         tokenResponse.AccessToken.Should().Be("1234567890");
 
         messageHandler.NumberOfCalls.Should().Be(1);
@@ -178,7 +178,7 @@ public class TokenClientCachingDecoratorTests
 
         // Set-up the token response cache mock:
         var cacheMock = new Mock<ITokenResponseCache>();
-        cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null);
+        cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse)null!);
 
         // Set-up the key generator mock:
         var keyGeneratorMock = new Mock<IKeyGenerator>();
@@ -200,13 +200,13 @@ public class TokenClientCachingDecoratorTests
 
         var tokenResponse = await cachingDecorator.RequestAccessToken(new TokenRequest
         {
-            TokenEndpoint    = "http://www.token-endpoint.com",
+            TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
         });
 
         tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.ShouldNotBeNull();
+        tokenResponse.AccessToken!.ShouldNotBeNull();
         tokenResponse.AccessToken.Should().Be("1234567890");
 
         messageHandler.NumberOfCalls.Should().Be(1);
@@ -219,7 +219,7 @@ public class TokenClientCachingDecoratorTests
         {
             // Cancel the token before executing the decorator so it throws immediately:
             var source = new CancellationTokenSource();
-            source.Cancel();
+            await source.CancelAsync();
 
             var decorator = new TokenClientCachingDecorator(
                 new NullLogger<TokenClientCachingDecorator>(),
@@ -231,10 +231,10 @@ public class TokenClientCachingDecoratorTests
 
             var response = await decorator.RequestAccessToken(new TokenRequest
             {
-                TokenEndpoint    = "http://www.token-endpoint.com",
+                TokenEndpoint    = "https://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
                 ClientSecret     = "client-secret",
-                Scopes           = new[] { "scope:read" }
+                Scopes           = ["scope:read"]
             }, cancellationToken: source.Token);
 
             return response;

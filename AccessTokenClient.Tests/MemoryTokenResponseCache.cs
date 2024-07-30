@@ -11,7 +11,7 @@ public class MemoryTokenResponseCacheTests
     [Fact]
     public void EnsureExceptionThrownWhenInjectedMemoryCacheIsNull()
     {
-        Func<MemoryTokenResponseCache> creationFunction = () => new MemoryTokenResponseCache(null);
+        var creationFunction = () => new MemoryTokenResponseCache(null!);
         creationFunction.Should().Throw<ArgumentNullException>();
     }
 
@@ -27,7 +27,7 @@ public class MemoryTokenResponseCacheTests
         });
         var cache = new MemoryTokenResponseCache(memoryCache);
         var tokenResponse = await cache.Get(Key);
-        tokenResponse.ShouldNotBeNull();
+        tokenResponse!.ShouldNotBeNull();
     }
 
     [Fact]

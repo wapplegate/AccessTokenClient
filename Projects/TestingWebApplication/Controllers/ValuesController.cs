@@ -1,7 +1,7 @@
 using AccessTokenClient;
 using Microsoft.AspNetCore.Mvc;
 
-namespace TestingSixPointZeroApplication.Controllers;
+namespace TestingWebApplication.Controllers;
 
 [ApiController]
 [Route("values")]
@@ -51,5 +51,5 @@ public class TestingClientOptions : ITokenRequestOptions
 
     public string ClientSecret { get; set; }
 
-    public string[] Scopes { get; set; }
+    public string[] Scopes { get; set; } = [];
 }

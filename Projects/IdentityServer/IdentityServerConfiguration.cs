@@ -7,10 +7,10 @@ public static class IdentityServerConfiguration
 {
     public static IEnumerable<ApiScope> Scopes => new[]
     {
-        new ApiScope("employee:read", "The ability to read employee data."),
-        new ApiScope("employee:create", "The ability create employee data."),
-        new ApiScope("employee:edit", "The ability to edit employee data."),
-        new ApiScope("employee:delete", "The ability to delete employee data.")
+        new ApiScope("movie:read", "The ability to read movie data."),
+        new ApiScope("movie:create", "The ability create a movie."),
+        new ApiScope("movie:edit", "The ability to edit movie data."),
+        new ApiScope("movie:delete", "The ability to delete a movie.")
     };
 
     public static IEnumerable<Client> Clients => new[]
@@ -26,10 +26,10 @@ public static class IdentityServerConfiguration
             },
             AllowedScopes     =
             {
-                "employee:read",
-                "employee:create",
-                "employee:edit",
-                "employee:delete"
+                "movie:read",
+                "movie:create",
+                "movie:edit",
+                "movie:delete"
             }
         }
     };

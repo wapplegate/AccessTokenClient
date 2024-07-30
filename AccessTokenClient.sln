@@ -17,7 +17,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Benchmarks", "Projects\Benc
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Console", "Projects\Console\Console.csproj", "{E296FB16-8A13-47C7-8604-84418813E699}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingSixPointZeroApplication", "Projects\TestingSixPointZeroApplication\TestingSixPointZeroApplication.csproj", "{48E954B7-06B4-44C2-8872-C8F98ADC5665}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestingWebApplication", "Projects\TestingWebApplication\TestingWebApplication.csproj", "{48E954B7-06B4-44C2-8872-C8F98ADC5665}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
