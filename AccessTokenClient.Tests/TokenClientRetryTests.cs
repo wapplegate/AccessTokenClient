@@ -43,7 +43,7 @@ public class TokenClientRetryTests
                 TokenEndpoint    = "http://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
                 ClientSecret     = "client-secret",
-                Scopes           = new[] { "scope:read" }
+                Scopes           = ["scope:read"]
             });
         }
         catch
@@ -94,7 +94,7 @@ public class TokenClientRetryTests
                 TokenEndpoint    = "http://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
                 ClientSecret     = "client-secret",
-                Scopes           = new[] { "scope:read" }
+                Scopes           = ["scope:read"]
             });
         }
         catch

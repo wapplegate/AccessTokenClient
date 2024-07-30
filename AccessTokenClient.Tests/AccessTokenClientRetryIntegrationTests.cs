@@ -47,10 +47,10 @@ public class AccessTokenClientRetryIntegrationTests
             TokenEndpoint    = "https://service/token",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[]
-            {
+            Scopes           =
+            [
                 "scope:read", "scope:create", "scope:edit", "scope:delete"
-            }
+            ]
         });
 
         await func.Should().ThrowAsync<Exception>();

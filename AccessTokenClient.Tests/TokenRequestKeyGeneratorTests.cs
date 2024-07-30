@@ -16,7 +16,7 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
@@ -30,7 +30,7 @@ public class TokenRequestKeyGeneratorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void EnsureExceptionThrownWhenTokenEndpointIsInvalid(string tokenEndpoint)
+    public void EnsureExceptionThrownWhenTokenEndpointIsInvalid(string? tokenEndpoint)
     {
         var generator = new TokenRequestKeyGenerator();
 
@@ -39,7 +39,7 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = tokenEndpoint,
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" }
+            Scopes           = ["scope_1", "scope_2", "scope_3"]
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
@@ -51,7 +51,7 @@ public class TokenRequestKeyGeneratorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void EnsureExceptionThrownWhenClientIdentifierIsInvalid(string clientIdentifier)
+    public void EnsureExceptionThrownWhenClientIdentifierIsInvalid(string? clientIdentifier)
     {
         var generator = new TokenRequestKeyGenerator();
 
@@ -60,7 +60,7 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = clientIdentifier,
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
@@ -72,7 +72,7 @@ public class TokenRequestKeyGeneratorTests
     [InlineData(null)]
     [InlineData("")]
     [InlineData(" ")]
-    public void EnsureExceptionThrownWhenClientSecretIsInvalid(string clientSecret)
+    public void EnsureExceptionThrownWhenClientSecretIsInvalid(string? clientSecret)
     {
         var generator = new TokenRequestKeyGenerator();
 
@@ -81,7 +81,7 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = clientSecret,
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" }
+            Scopes           = ["scope_1", "scope_2", "scope_3"]
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
@@ -98,7 +98,7 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
@@ -108,7 +108,7 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "CLIENT-IDENTIFIER",
             ClientSecret     = "CLIENT-SECRET",
-            Scopes           = new[] { "SCOPE_1", "SCOPE_2", "SCOPE_3" },
+            Scopes           = ["SCOPE_1", "SCOPE_2", "SCOPE_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
