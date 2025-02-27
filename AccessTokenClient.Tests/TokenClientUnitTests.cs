@@ -1,6 +1,6 @@
 using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shouldly;
 using System.Net;
 using Xunit;
 
@@ -24,10 +24,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<HttpRequestException>();
+        await function.ShouldThrowAsync<HttpRequestException>();
     }
 
     [Fact]
@@ -46,10 +46,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<Exception>();
+        await function.ShouldThrowAsync<Exception>();
     }
 
     [Theory]
@@ -71,10 +71,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<HttpRequestException>();
+        await function.ShouldThrowAsync<HttpRequestException>();
     }
 
     [Fact]
@@ -87,7 +87,7 @@ public class TokenClientUnitTests
         // Cancel the token before executing the token client so it throws immediately:
         var source = new CancellationTokenSource();
         source.Cancel();
-            
+
         var client = new TokenClient(logger, httpClient);
 
         Func<Task<TokenResponse>> function = async () =>
@@ -97,13 +97,13 @@ public class TokenClientUnitTests
                 TokenEndpoint    = "http://www.token-endpoint.com",
                 ClientIdentifier = "client-identifier",
                 ClientSecret     = "client-secret",
-                Scopes           = new[] { "scope:read" }
+                Scopes           = ["scope:read"]
             }, cancellationToken: source.Token);
 
             return tokenResponse;
         };
 
-        await function.Should().ThrowAsync<OperationCanceledException>();
+        await function.ShouldThrowAsync<OperationCanceledException>();
     }
 
     [Theory]
@@ -125,10 +125,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = tokenEndpoint,
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -150,10 +150,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = clientIdentifier,
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -175,10 +175,10 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = clientSecret,
-            Scopes           = new[] { "scope:read" }
+            Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -197,8 +197,8 @@ public class TokenClientUnitTests
             TokenEndpoint    = "http://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope:read" }
-        }, execute: request => Task.FromResult(new TokenResponse 
+            Scopes           = ["scope:read"]
+        }, execute: request => Task.FromResult(new TokenResponse
         {
             AccessToken = "access-token",
             ExpiresIn   = 8000
@@ -206,8 +206,8 @@ public class TokenClientUnitTests
 
         // Ensure the access token and expiration match what is returned from the execute func:
         tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.Should().Be("access-token");
-        tokenResponse.ExpiresIn.Should().Be(8000);
-        messageHandler.NumberOfCalls.Should().Be(0);
+        tokenResponse.AccessToken.ShouldBe("access-token");
+        tokenResponse.ExpiresIn.ShouldBe(8000);
+        messageHandler.NumberOfCalls.ShouldBe(0);
     }
 }

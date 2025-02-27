@@ -72,13 +72,12 @@ public class TokenClient : ITokenClient
 
         var scopes = request.Scopes != null ? string.Join(" ", request.Scopes) : string.Empty;
 
-        var content = new FormUrlEncodedContent(new[]
-        {
+        var content = new FormUrlEncodedContent([
             new KeyValuePair<string, string>("client_id",     request.ClientIdentifier),
             new KeyValuePair<string, string>("client_secret", request.ClientSecret),
             new KeyValuePair<string, string>("grant_type",    "client_credentials"),
             new KeyValuePair<string, string>("scope",         scopes)
-        });
+        ]);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
 

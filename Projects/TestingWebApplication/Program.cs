@@ -1,7 +1,7 @@
 using AccessTokenClient;
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
-using TestingSixPointZeroApplication.Controllers;
+using TestingWebApplication.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,7 +9,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new() { Title = "TestingSixPointZeroApplication", Version = "v1" });
+    c.SwaggerDoc("v1", new() { Title = "TestingWebApplication", Version = "v1" });
 });
 
 builder.Services.AddMemoryCache();
@@ -33,7 +33,7 @@ builder.Services.AddSingleton(new TestingClientOptions
     TokenEndpoint    = "https://localhost:44303/connect/token",
     ClientIdentifier = "testing_client_identifier",
     ClientSecret     = "511536EF-F270-4058-80CA-1C89C192F69A",
-    Scopes           = new[] { "employee:read" }
+    Scopes           = ["employee:read"]
 });
 
 builder.Services
@@ -45,7 +45,7 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
-    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TestingSixPointZeroApplication v1"));
+    app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "TestingWebApplication v1"));
 }
 
 app.UseAuthorization();

@@ -1,5 +1,3 @@
-[![Build Status](https://dev.azure.com/bill-applegate/AccessTokenClient/_apis/build/status/wapplegate.AccessTokenClient?branchName=development)](https://dev.azure.com/bill-applegate/AccessTokenClient/_build/latest?definitionId=4&branchName=development) ![Azure DevOps coverage](https://img.shields.io/azure-devops/coverage/bill-applegate/AccessTokenClient/4)
-
 ## About
 
 This library provides an access token client that can be used to make client credentials OAuth requests. Instead of re-writing the same access token clients over and over again for services, use this package to make those token requests. The package also includes the ability to cache access tokens in memory so they can be reused and provides extension points for custom cache implementations.
@@ -124,7 +122,7 @@ public class TestClient
             requestMessage.Headers.Authorization = new AuthenticationHeaderValue("Bearer", tokenResponse.AccessToken);
 
             var response = await httpClient.SendAsync(requestMessage);
-            
+
             return await response.Content.ReadAsStringAsync();
         }
     }
