@@ -1,6 +1,5 @@
 using AccessTokenClient.Caching;
-using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -16,14 +15,14 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
         var key = generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
         key.ShouldNotBeNull();
-        key.Should().Contain("AccessTokenClient::");
+        key.ShouldContain("AccessTokenClient::");
     }
 
     [Theory]
@@ -39,12 +38,12 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = tokenEndpoint,
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" }
+            Scopes           = ["scope_1", "scope_2", "scope_3"]
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Theory]
@@ -60,12 +59,12 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = clientIdentifier,
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Theory]
@@ -81,12 +80,12 @@ public class TokenRequestKeyGeneratorTests
             TokenEndpoint    = "https://www.token-endpoint.com",
             ClientIdentifier = "client-identifier",
             ClientSecret     = clientSecret,
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" }
+            Scopes           = ["scope_1", "scope_2", "scope_3"]
         };
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -98,7 +97,7 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "client-identifier",
             ClientSecret     = "client-secret",
-            Scopes           = new[] { "scope_1", "scope_2", "scope_3" },
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
@@ -108,7 +107,7 @@ public class TokenRequestKeyGeneratorTests
         {
             ClientIdentifier = "CLIENT-IDENTIFIER",
             ClientSecret     = "CLIENT-SECRET",
-            Scopes           = new[] { "SCOPE_1", "SCOPE_2", "SCOPE_3" },
+            Scopes           = ["SCOPE_1", "SCOPE_2", "SCOPE_3"],
             TokenEndpoint    = "https://www.token-endpoint.com"
         };
 
@@ -117,6 +116,6 @@ public class TokenRequestKeyGeneratorTests
         keyOne.ShouldNotBeNull();
         keyTwo.ShouldNotBeNull();
 
-        keyOne.Should().NotBeEquivalentTo(keyTwo);
+        keyOne.ShouldNotBeSameAs(keyTwo);
     }
 }

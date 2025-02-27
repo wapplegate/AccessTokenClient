@@ -1,7 +1,6 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.Caching.Memory;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -12,7 +11,7 @@ public class MemoryTokenResponseCacheTests
     public void EnsureExceptionThrownWhenInjectedMemoryCacheIsNull()
     {
         Func<MemoryTokenResponseCache> creationFunction = () => new MemoryTokenResponseCache(null);
-        creationFunction.Should().Throw<ArgumentNullException>();
+        creationFunction.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -41,7 +40,7 @@ public class MemoryTokenResponseCacheTests
             AccessToken = "1234567890",
             ExpiresIn   = 3000
         }, TimeSpan.FromMinutes(3000));
-        result.Should().BeTrue();
+        result.ShouldBeTrue();
     }
 
     [Fact]
@@ -51,6 +50,6 @@ public class MemoryTokenResponseCacheTests
         IMemoryCache memoryCache = new MemoryCache(new MemoryCacheOptions());
         var cache = new MemoryTokenResponseCache(memoryCache);
         var result = await cache.Get(Key);
-        result.Should().BeNull();
+        result.ShouldBeNull();
     }
 }

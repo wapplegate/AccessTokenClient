@@ -26,5 +26,5 @@ public class TokenRequest
     /// <summary>
     /// Gets or sets the requested scopes.
     /// </summary>
-    public string[] Scopes { get; set; } = Array.Empty<string>();
+    public string[] Scopes { get; set; } = [];
 }

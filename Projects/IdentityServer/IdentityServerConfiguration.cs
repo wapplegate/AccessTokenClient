@@ -5,16 +5,16 @@ namespace IdentityServer;
 
 public static class IdentityServerConfiguration
 {
-    public static IEnumerable<ApiScope> Scopes => new[]
-    {
+    public static IEnumerable<ApiScope> Scopes =>
+    [
         new ApiScope("employee:read", "The ability to read employee data."),
         new ApiScope("employee:create", "The ability create employee data."),
         new ApiScope("employee:edit", "The ability to edit employee data."),
         new ApiScope("employee:delete", "The ability to delete employee data.")
-    };
+    ];
 
-    public static IEnumerable<Client> Clients => new[]
-    {
+    public static IEnumerable<Client> Clients =>
+    [
         new Client
         {
             ClientId          = "testing_client_identifier",
@@ -32,5 +32,5 @@ public static class IdentityServerConfiguration
                 "employee:delete"
             }
         }
-    };
+    ];
 }
