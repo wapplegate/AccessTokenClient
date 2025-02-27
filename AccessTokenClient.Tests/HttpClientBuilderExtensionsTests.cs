@@ -1,6 +1,6 @@
 using AccessTokenClient.Extensions;
-using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -40,11 +40,11 @@ public class HttpClientBuilderExtensionsTests
     private class TestClientTokenOptions : ITokenRequestOptions
     {
         public string TokenEndpoint { get; set; }
-        
+
         public string ClientIdentifier { get; set; }
 
         public string ClientSecret { get; set; }
 
-        public string[] Scopes { get; set; }
+        public string[] Scopes { get; set; } = [];
     }
 }

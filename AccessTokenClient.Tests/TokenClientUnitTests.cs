@@ -1,6 +1,6 @@
 using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.Logging.Abstractions;
+using Shouldly;
 using System.Net;
 using Xunit;
 
@@ -27,7 +27,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<HttpRequestException>();
+        await function.ShouldThrowAsync<HttpRequestException>();
     }
 
     [Fact]
@@ -49,7 +49,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<Exception>();
+        await function.ShouldThrowAsync<Exception>();
     }
 
     [Theory]
@@ -74,7 +74,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<HttpRequestException>();
+        await function.ShouldThrowAsync<HttpRequestException>();
     }
 
     [Fact]
@@ -103,7 +103,7 @@ public class TokenClientUnitTests
             return tokenResponse;
         };
 
-        await function.Should().ThrowAsync<OperationCanceledException>();
+        await function.ShouldThrowAsync<OperationCanceledException>();
     }
 
     [Theory]
@@ -128,7 +128,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -153,7 +153,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Theory]
@@ -178,7 +178,7 @@ public class TokenClientUnitTests
             Scopes           = ["scope:read"]
         });
 
-        await function.Should().ThrowAsync<ArgumentException>();
+        await function.ShouldThrowAsync<ArgumentException>();
     }
 
     [Fact]
@@ -206,8 +206,8 @@ public class TokenClientUnitTests
 
         // Ensure the access token and expiration match what is returned from the execute func:
         tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.Should().Be("access-token");
-        tokenResponse.ExpiresIn.Should().Be(8000);
-        messageHandler.NumberOfCalls.Should().Be(0);
+        tokenResponse.AccessToken.ShouldBe("access-token");
+        tokenResponse.ExpiresIn.ShouldBe(8000);
+        messageHandler.NumberOfCalls.ShouldBe(0);
     }
 }

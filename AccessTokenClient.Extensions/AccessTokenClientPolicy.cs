@@ -22,7 +22,7 @@ public static class AccessTokenClientPolicy
     /// <see cref="HttpClient"/> instance that is injected into the access token client.
     /// This policy retries the token request in the event of transient http errors
     /// (5XX and 408) as well as when a 404 is encountered. The request will be retried
-    /// twice, with a 1 second wait time between retries.
+    /// twice, with a 1-second wait time between retries.
     /// </returns>
     public static IAsyncPolicy<HttpResponseMessage> GetDefaultRetryPolicy(ILogger<ITokenClient>? logger = null)
     {
