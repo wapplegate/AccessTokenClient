@@ -1,10 +1,10 @@
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using System.Net;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -33,7 +33,7 @@ public class AccessTokenClientRetryIntegrationTests
                     return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                 });
 
-                // Set-up a delegating handler to mock the response for the test:
+                // Set up a delegating handler to mock the response for the test:
                 builder.AddHttpMessageHandler(() => mockHandler);
             })
             .AddAccessTokenClientCache<MemoryTokenResponseCache>();
@@ -53,8 +53,8 @@ public class AccessTokenClientRetryIntegrationTests
             ]
         });
 
-        await func.Should().ThrowAsync<Exception>();
+        await func.ShouldThrowAsync<Exception>();
 
-        mockHandler.NumberOfCalls.Should().Be(3);
+        mockHandler.NumberOfCalls.ShouldBe(3);
     }
 }

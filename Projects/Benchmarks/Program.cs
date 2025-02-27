@@ -36,7 +36,7 @@ public class Program
                         return AccessTokenClientPolicy.GetDefaultRetryPolicy(logger);
                     });
 
-                    // Set-up a delegating handler to mock the response for the test:
+                    // Set up a delegating handler to mock the response for the test:
                     builder.AddHttpMessageHandler(() => mockHandler);
                 })
                 .AddAccessTokenClientCache<MemoryTokenResponseCache>();

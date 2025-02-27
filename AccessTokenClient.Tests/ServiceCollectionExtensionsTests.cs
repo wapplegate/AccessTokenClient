@@ -1,9 +1,8 @@
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
-using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -24,7 +23,7 @@ public class ServiceCollectionExtensionsTests
         var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
-        client.Should().BeOfType<TokenClientCachingDecorator>();
+        client.ShouldBeOfType<TokenClientCachingDecorator>();
     }
 
 
@@ -43,7 +42,7 @@ public class ServiceCollectionExtensionsTests
         var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
-        client.Should().BeOfType<TokenClient>();
+        client.ShouldBeOfType<TokenClient>();
     }
 
     [Fact]
@@ -67,7 +66,7 @@ public class ServiceCollectionExtensionsTests
         var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
-        client.Should().BeOfType<TokenClient>();
+        client.ShouldBeOfType<TokenClient>();
     }
 
     [Fact]
@@ -84,7 +83,7 @@ public class ServiceCollectionExtensionsTests
         var client = provider.GetRequiredService<ITokenClient>();
 
         client.ShouldNotBeNull();
-        client.Should().BeOfType<TokenClient>();
+        client.ShouldBeOfType<TokenClient>();
     }
 
     [Fact]
@@ -97,14 +96,14 @@ public class ServiceCollectionExtensionsTests
             options.CacheKeyPrefix = string.Empty;
         });
 
-        invalidPrefixAction.Should().Throw<ArgumentException>();
+        invalidPrefixAction.ShouldThrow<ArgumentException>();
 
         Action invalidBufferAction = () => services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCache>(options =>
         {
             options.ExpirationBuffer = 0;
         });
 
-        invalidBufferAction.Should().Throw<ArgumentException>();
+        invalidBufferAction.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -114,7 +113,7 @@ public class ServiceCollectionExtensionsTests
 
         Action action = () => services!.AddAccessTokenClient();
 
-        action.Should().Throw<ArgumentNullException>();
+        action.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -124,6 +123,6 @@ public class ServiceCollectionExtensionsTests
 
         Action action = () => services!.AddAccessTokenClientCache<MemoryTokenResponseCache>();
 
-        action.Should().Throw<ArgumentNullException>();
+        action.ShouldThrow<ArgumentNullException>();
     }
 }

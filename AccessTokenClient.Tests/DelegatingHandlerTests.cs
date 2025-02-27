@@ -1,5 +1,5 @@
-﻿using FluentAssertions;
-using Moq;
+﻿using Moq;
+using Shouldly;
 using System.Net;
 using Xunit;
 
@@ -13,7 +13,7 @@ public class DelegatingHandlerTests
         ITokenRequestOptions options = new Options();
         Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
 
-        action.Should().Throw<ArgumentNullException>();
+        action.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -22,7 +22,7 @@ public class DelegatingHandlerTests
         var mockClient = new Mock<ITokenClient>();
         Action action = () => _ = new AccessTokenDelegatingHandler(null, mockClient.Object);
 
-        action.Should().Throw<ArgumentNullException>();
+        action.ShouldThrow<ArgumentNullException>();
     }
 
     [Fact]
@@ -66,5 +66,5 @@ public class Options : ITokenRequestOptions
 
     public string ClientSecret { get; set; }
 
-    public string[] Scopes { get; set; }
+    public string[] Scopes { get; set; } = [];
 }
