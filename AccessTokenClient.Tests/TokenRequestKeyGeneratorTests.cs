@@ -1,6 +1,5 @@
 using AccessTokenClient.Caching;
-using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -23,7 +22,7 @@ public class TokenRequestKeyGeneratorTests
         var key = generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
         key.ShouldNotBeNull();
-        key.Should().Contain("AccessTokenClient::");
+        key.ShouldContain("AccessTokenClient::");
     }
 
     [Theory]
@@ -44,7 +43,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Theory]
@@ -65,7 +64,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Theory]
@@ -86,7 +85,7 @@ public class TokenRequestKeyGeneratorTests
 
         Action action = () => generator.GenerateTokenRequestKey(request, "AccessTokenClient");
 
-        action.Should().Throw<ArgumentException>();
+        action.ShouldThrow<ArgumentException>();
     }
 
     [Fact]
@@ -117,6 +116,6 @@ public class TokenRequestKeyGeneratorTests
         keyOne.ShouldNotBeNull();
         keyTwo.ShouldNotBeNull();
 
-        keyOne.Should().NotBeEquivalentTo(keyTwo);
+        keyOne.ShouldNotBeSameAs(keyTwo);
     }
 }

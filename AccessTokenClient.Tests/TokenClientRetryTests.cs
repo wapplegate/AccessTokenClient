@@ -1,8 +1,8 @@
 using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Shouldly;
 using System.Net;
 using Xunit;
 
@@ -52,7 +52,7 @@ public class TokenClientRetryTests
         }
 
         // Currently, the retry policy is configured to retry twice, thus the total number of calls will be three:
-        mockHandler.NumberOfCalls.Should().Be(3);
+        mockHandler.NumberOfCalls.ShouldBe(3);
     }
 
     [Theory]
@@ -103,6 +103,6 @@ public class TokenClientRetryTests
         }
 
         // Currently, the retry policy is configured to retry twice, thus the total number of calls will be three:
-        mockHandler.NumberOfCalls.Should().Be(3);
+        mockHandler.NumberOfCalls.ShouldBe(3);
     }
 }

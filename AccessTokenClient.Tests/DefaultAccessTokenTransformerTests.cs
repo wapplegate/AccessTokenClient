@@ -1,6 +1,5 @@
 ﻿using AccessTokenClient.Caching;
-using AccessTokenClient.Tests.Helpers;
-using FluentAssertions;
+using Shouldly;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
@@ -16,7 +15,7 @@ public class DefaultAccessTokenTransformerTests
         var convertedValue = transformer.Convert(Value);
 
         convertedValue.ShouldNotBeNull();
-        convertedValue.Should().Be(Value);
+        convertedValue.ShouldBe(Value);
     }
 
     [Fact]
@@ -28,6 +27,6 @@ public class DefaultAccessTokenTransformerTests
         var revertedValue = transformer.Revert(Value);
 
         revertedValue.ShouldNotBeNull();
-        revertedValue.Should().Be(Value);
+        revertedValue.ShouldBe(Value);
     }
 }
