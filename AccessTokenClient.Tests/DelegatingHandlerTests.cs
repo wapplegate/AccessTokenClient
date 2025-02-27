@@ -1,6 +1,6 @@
 ﻿using Moq;
-using System.Net;
 using Shouldly;
+using System.Net;
 using Xunit;
 
 namespace AccessTokenClient.Tests;

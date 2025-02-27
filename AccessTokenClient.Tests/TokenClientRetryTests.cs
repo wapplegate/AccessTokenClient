@@ -2,8 +2,8 @@ using AccessTokenClient.Extensions;
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using System.Net;
 using Shouldly;
+using System.Net;
 using Xunit;
 
 namespace AccessTokenClient.Tests;

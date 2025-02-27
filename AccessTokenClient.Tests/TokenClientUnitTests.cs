@@ -1,7 +1,7 @@
 using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.Logging.Abstractions;
-using System.Net;
 using Shouldly;
+using System.Net;
 using Xunit;
 
 namespace AccessTokenClient.Tests;

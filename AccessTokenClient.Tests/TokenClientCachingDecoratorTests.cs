@@ -3,8 +3,8 @@ using AccessTokenClient.Tests.Helpers;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using System.Net;
 using Shouldly;
+using System.Net;
 using Xunit;
 
 namespace AccessTokenClient.Tests;
