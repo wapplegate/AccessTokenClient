@@ -26,10 +26,7 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection instance.</returns>
     public static IServiceCollection AddAccessTokenClient(this IServiceCollection services, Action<IHttpClientBuilder>? builderAction = null)
     {
-        if (services == null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
 
         var httpClientBuilder = services.AddHttpClient<ITokenClient, TokenClient>("AccessTokenClient.TokenClient");
 
@@ -49,10 +46,7 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection instance.</returns>
     public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions>? action = null) where T : ITokenResponseCache
     {
-        if (services == null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
+        ArgumentNullException.ThrowIfNull(services);
 
         var options = new TokenClientCacheOptions();
         action?.Invoke(options);
@@ -62,10 +56,7 @@ public static class ServiceCollectionExtensions
             throw new ArgumentException("The expiration buffer must be greater than 0.");
         }
 
-        if (string.IsNullOrWhiteSpace(options.CacheKeyPrefix))
-        {
-            throw new ArgumentException("A cache key prefix must be specified.");
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(options.CacheKeyPrefix);
 
         services.TryAddSingleton(options);
         services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();

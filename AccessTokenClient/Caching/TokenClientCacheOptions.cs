@@ -1,6 +1,6 @@
 namespace AccessTokenClient.Caching;
 
-public class TokenClientCacheOptions
+public sealed class TokenClientCacheOptions
 {
     /// <summary>
     /// Gets or sets the token expiration buffer.

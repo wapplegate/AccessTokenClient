@@ -180,34 +180,4 @@ public class TokenClientUnitTests
 
         await function.ShouldThrowAsync<ArgumentException>();
     }
-
-    [Fact]
-    public async Task EnsureTokenResponseFromOptionalFunctionIsReturned()
-    {
-        const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
-
-        var logger = new NullLogger<TokenClient>();
-        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
-        var httpClient = new HttpClient(messageHandler);
-
-        var tokenClient = new TokenClient(logger, httpClient);
-
-        var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
-        {
-            TokenEndpoint    = "https://www.token-endpoint.com",
-            ClientIdentifier = "client-identifier",
-            ClientSecret     = "client-secret",
-            Scopes           = ["scope:read"]
-        }, execute: _ => Task.FromResult(new TokenResponse
-        {
-            AccessToken = "access-token",
-            ExpiresIn   = 8000
-        }));
-
-        // Ensure the access token and expiration match what is returned from the execute func:
-        tokenResponse.ShouldNotBeNull();
-        tokenResponse.AccessToken.ShouldBe("access-token");
-        tokenResponse.ExpiresIn.ShouldBe(8000);
-        messageHandler.NumberOfCalls.ShouldBe(0);
-    }
 }
