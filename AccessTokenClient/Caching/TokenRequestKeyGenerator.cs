@@ -13,13 +13,17 @@ public class TokenRequestKeyGenerator : IKeyGenerator
     /// <inheritdoc />
     public string GenerateTokenRequestKey(TokenRequest request, string prefix)
     {
-        TokenRequestValidator.EnsureRequestIsValid(request);
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientIdentifier);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientSecret);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.TokenEndpoint);
 
         var concatenatedRequest = GenerateConcatenatedRequest(request);
 
-        using var hasher = SHA256.Create();
         var textData = Encoding.UTF8.GetBytes(concatenatedRequest);
-        var hash = hasher.ComputeHash(textData);
+
+        var hash = SHA256.HashData(textData);
 
         var convertedHash = BitConverter.ToString(hash).Replace("-", string.Empty);
 
