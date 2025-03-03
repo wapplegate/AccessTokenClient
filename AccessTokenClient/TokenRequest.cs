@@ -1,12 +1,10 @@
-using System;
-
 namespace AccessTokenClient;
 
 /// <summary>
 /// This class encapsulates the parameters that are
-/// necessary to make a client credentials token request. 
+/// necessary to make a client credentials token request.
 /// </summary>
-public class TokenRequest
+public sealed class TokenRequest
 {
     /// <summary>
     /// Gets or sets the token endpoint URL.
@@ -26,5 +24,5 @@ public class TokenRequest
     /// <summary>
     /// Gets or sets the requested scopes.
     /// </summary>
-    public string[] Scopes { get; set; } = Array.Empty<string>();
+    public string[] Scopes { get; set; } = [];
 }

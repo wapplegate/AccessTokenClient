@@ -33,20 +33,13 @@ public class TokenClient : ITokenClient
     /// Executes a token request to the specified endpoint and returns the token response.
     /// </summary>
     /// <param name="request">The token request.</param>
-    /// <param name="execute">
-    /// An optional function that can be passed in to override the method that executes the token request.
-    /// </param>
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>The token response.</returns>
-    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute = null, CancellationToken cancellationToken = default)
+    public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
     {
-        TokenRequestValidator.EnsureRequestIsValid(request);
-
         try
         {
-            logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
-
-            var tokenResponse = await ExecuteTokenRequest(request, execute, cancellationToken);
+            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken);
 
             return tokenResponse;
         }
@@ -57,28 +50,28 @@ public class TokenClient : ITokenClient
         }
     }
 
-    private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, Func<TokenRequest, Task<TokenResponse>>? execute, CancellationToken cancellationToken)
+    private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, CancellationToken cancellationToken)
     {
-        if (execute != null)
-        {
-            return await execute(request);
-        }
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientIdentifier);
 
-        TokenRequestValidator.EnsureRequestIsValid(request);
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientSecret);
+
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.TokenEndpoint);
 
         cancellationToken.ThrowIfCancellationRequested();
+
+        logger.LogInformation("Executing token request to token endpoint '{TokenEndpoint}'.", request.TokenEndpoint);
 
         var uri = new Uri(request.TokenEndpoint);
 
         var scopes = request.Scopes != null ? string.Join(" ", request.Scopes) : string.Empty;
 
-        var content = new FormUrlEncodedContent(new[]
-        {
+        var content = new FormUrlEncodedContent([
             new KeyValuePair<string, string>("client_id",     request.ClientIdentifier),
             new KeyValuePair<string, string>("client_secret", request.ClientSecret),
             new KeyValuePair<string, string>("grant_type",    "client_credentials"),
             new KeyValuePair<string, string>("scope",         scopes)
-        });
+        ]);
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
 
@@ -93,7 +86,7 @@ public class TokenClient : ITokenClient
             
         var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
-        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.TokenResponse, cancellationToken);
+        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken);
 
         if (tokenResponse == null)
         {
@@ -105,13 +98,15 @@ public class TokenClient : ITokenClient
             throw new HttpRequestException($"An invalid token response was returned from token endpoint '{request.TokenEndpoint}'.");
         }
 
-        logger.LogDebug("Token response from token endpoint '{TokenEndpoint}' is valid.", request.TokenEndpoint);
-
-        return tokenResponse;
+        return new TokenResponse
+        {
+            AccessToken = tokenResponse.AccessToken,
+            ExpiresIn = tokenResponse.ExpiresIn
+        };
     }
 
-    private static bool TokenResponseValid(TokenResponse? response)
+    private static bool TokenResponseValid(HttpTokenResponse? response)
     {
-        return response != null && !string.IsNullOrWhiteSpace(response.AccessToken);
+        return response != null && !string.IsNullOrWhiteSpace(response.AccessToken) && response.ExpiresIn > 0;
     }
 }

@@ -1,4 +1,4 @@
-﻿using Moq;
+using Moq;
 using Shouldly;
 using System.Net;
 using Xunit;
@@ -32,7 +32,7 @@ public class DelegatingHandlerTests
         var mockClient = new Mock<ITokenClient>();
 
         mockClient
-            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<Func<TokenRequest, Task<TokenResponse>>>(), It.IsAny<CancellationToken>()))
+            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new TokenResponse
             {
                 AccessToken = "1234567890",

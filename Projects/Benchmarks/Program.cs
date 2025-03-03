@@ -1,4 +1,3 @@
-using System.Net;
 using AccessTokenClient;
 using AccessTokenClient.Caching;
 using AccessTokenClient.Extensions;
@@ -7,6 +6,7 @@ using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using System.Net;
 
 namespace Benchmarks;
 
