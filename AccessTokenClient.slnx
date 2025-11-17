@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/Projects/">
+    <Project Path="Projects/Benchmarks/Benchmarks.csproj" />
+    <Project Path="Projects/Console/Console.csproj" />
+    <Project Path="Projects/IdentityServer/IdentityServer.csproj" />
+    <Project Path="Projects/TestingWebApplication/TestingWebApplication.csproj" />
+  </Folder>
+  <Project Path="AccessTokenClient.Extensions/AccessTokenClient.Extensions.csproj" />
+  <Project Path="AccessTokenClient.Tests/AccessTokenClient.Tests.csproj" />
+  <Project Path="AccessTokenClient/AccessTokenClient.csproj" />
+</Solution>
