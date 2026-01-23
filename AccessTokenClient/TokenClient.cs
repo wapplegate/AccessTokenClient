@@ -53,9 +53,7 @@ public class TokenClient : ITokenClient
     private async Task<TokenResponse> ExecuteTokenRequest(TokenRequest request, CancellationToken cancellationToken)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientIdentifier);
-
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientSecret);
-
         ArgumentException.ThrowIfNullOrWhiteSpace(request.TokenEndpoint);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -73,9 +71,10 @@ public class TokenClient : ITokenClient
             new KeyValuePair<string, string>("scope",         scopes)
         ]);
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
+        requestMessage.Content = content;
 
-        var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
+        using var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
 
         if (!responseMessage.IsSuccessStatusCode)
         {
@@ -83,7 +82,7 @@ public class TokenClient : ITokenClient
 
             throw new HttpRequestException($"The token request failed with status code {statusCode}.");
         }
-            
+
         var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
         var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken);

@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using System;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,6 +24,8 @@ public class TokenClientCachingDecorator : ITokenClient
     private readonly IKeyGenerator keyGenerator;
 
     private readonly IAccessTokenTransformer transformer;
+
+    private readonly ConcurrentDictionary<string, SemaphoreSlim> locks = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="TokenClientCachingDecorator"/> class.
@@ -52,9 +55,7 @@ public class TokenClientCachingDecorator : ITokenClient
     public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientIdentifier);
-
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientSecret);
-
         ArgumentException.ThrowIfNullOrWhiteSpace(request.TokenEndpoint);
 
         cancellationToken.ThrowIfCancellationRequested();
@@ -69,31 +70,71 @@ public class TokenClientCachingDecorator : ITokenClient
         {
             logger.LogDebug("Successfully retrieved the token response with key '{Key}' from the cache.", key);
 
-            cachedTokenResponse.AccessToken = transformer.Revert(cachedTokenResponse.AccessToken);
-
-            return cachedTokenResponse;
+            return new TokenResponse
+            {
+                AccessToken = transformer.Revert(cachedTokenResponse.AccessToken),
+                ExpiresIn = cachedTokenResponse.ExpiresIn
+            };
         }
 
-        logger.LogDebug("Token response with key '{Key}' does not exist in the cache.", key);
+        var semaphore = locks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
 
-        var tokenResponse = await decoratedClient.RequestAccessToken(request, cancellationToken);
+        await semaphore.WaitAsync(cancellationToken);
 
-        await CacheTokenResponse(key, tokenResponse, cancellationToken);
+        try
+        {
+            // Double-check the cache after acquiring the lock:
+            cachedTokenResponse = await cache.Get(key, cancellationToken);
 
-        return tokenResponse;
+            if (cachedTokenResponse != null)
+            {
+                logger.LogDebug("Successfully retrieved the token response with key '{Key}' from the cache.", key);
+
+                return new TokenResponse
+                {
+                    AccessToken = transformer.Revert(cachedTokenResponse.AccessToken),
+                    ExpiresIn = cachedTokenResponse.ExpiresIn
+                };
+            }
+
+            logger.LogDebug("Token response with key '{Key}' does not exist in the cache.", key);
+
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, cancellationToken);
+
+            await CacheTokenResponse(key, tokenResponse, cancellationToken);
+
+            return tokenResponse;
+        }
+        finally
+        {
+            semaphore.Release();
+        }
     }
 
     private async Task CacheTokenResponse(string key, TokenResponse tokenResponse, CancellationToken cancellationToken)
     {
+        var expirationMinutes = (double)tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer;
+
+        if (expirationMinutes <= 0)
+        {
+            logger.LogWarning(
+                "Token response with key '{Key}' has a lifetime of {ExpiresIn} seconds which is too short to cache with the configured expiration buffer of {Buffer} minutes.",
+                key, tokenResponse.ExpiresIn, options.ExpirationBuffer);
+
+            return;
+        }
+
         logger.LogDebug("Attempting to store token response with key '{Key}' in the cache.", key);
 
-        var expirationTimeSpan = TimeSpan.FromMinutes(tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer);
+        var expirationTimeSpan = TimeSpan.FromMinutes(expirationMinutes);
 
-        var accessTokenValue = tokenResponse.AccessToken;
+        var cacheEntry = new TokenResponse
+        {
+            AccessToken = transformer.Convert(tokenResponse.AccessToken),
+            ExpiresIn = tokenResponse.ExpiresIn
+        };
 
-        tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
-
-        var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, cancellationToken);
+        var tokenStoredSuccessfully = await cache.Set(key, cacheEntry, expirationTimeSpan, cancellationToken);
 
         if (tokenStoredSuccessfully)
         {
@@ -103,7 +144,5 @@ public class TokenClientCachingDecorator : ITokenClient
         {
             logger.LogWarning("Unable to store token response with key '{Key}' in the cache.", key);
         }
-
-        tokenResponse.AccessToken = accessTokenValue;
     }
 }
