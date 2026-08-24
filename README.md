@@ -28,7 +28,7 @@ services.AddAccessTokenClient(builder =>
 });
 ```
 
-The default policy configures the token client to retry twice when a transient error has been encountered. It will wait one second between each retry. This retry functionality is not enabled by default.
+The default policy configures the token client to retry twice when a transient error or a 429 response has been encountered. It uses exponential backoff with jitter and honors Retry-After response headers up to 30 seconds. This retry functionality is not enabled by default.
 
 ## Caching
 

@@ -11,10 +11,11 @@ namespace AccessTokenClient.Tests;
 public class TokenClientRetryTests
 {
     [Theory]
-    [InlineData(HttpStatusCode.NotFound)]
-    [InlineData(HttpStatusCode.RequestTimeout)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    public async Task EnsureTokenRequestRetriedOnFailure(HttpStatusCode httpStatusCode)
+    [InlineData(HttpStatusCode.NotFound, 1)]
+    [InlineData(HttpStatusCode.TooManyRequests, 3)]
+    [InlineData(HttpStatusCode.RequestTimeout, 3)]
+    [InlineData(HttpStatusCode.InternalServerError, 3)]
+    public async Task EnsureTokenRequestRetriedOnFailure(HttpStatusCode httpStatusCode, int expectedCalls)
     {
         var services = new ServiceCollection();
 
@@ -51,15 +52,15 @@ public class TokenClientRetryTests
             // Swallowed purposefully.
         }
 
-        // Currently, the retry policy is configured to retry twice, thus the total number of calls will be three:
-        mockHandler.NumberOfCalls.ShouldBe(3);
+        mockHandler.NumberOfCalls.ShouldBe(expectedCalls);
     }
 
     [Theory]
-    [InlineData(HttpStatusCode.NotFound)]
-    [InlineData(HttpStatusCode.RequestTimeout)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    public async Task EnsureTokenRequestRetriedOnFailureWhenLoggerSpecified(HttpStatusCode httpStatusCode)
+    [InlineData(HttpStatusCode.NotFound, 1)]
+    [InlineData(HttpStatusCode.TooManyRequests, 3)]
+    [InlineData(HttpStatusCode.RequestTimeout, 3)]
+    [InlineData(HttpStatusCode.InternalServerError, 3)]
+    public async Task EnsureTokenRequestRetriedOnFailureWhenLoggerSpecified(HttpStatusCode httpStatusCode, int expectedCalls)
     {
         var services = new ServiceCollection();
 
@@ -102,7 +103,6 @@ public class TokenClientRetryTests
             // Swallowed purposefully.
         }
 
-        // Currently, the retry policy is configured to retry twice, thus the total number of calls will be three:
-        mockHandler.NumberOfCalls.ShouldBe(3);
+        mockHandler.NumberOfCalls.ShouldBe(expectedCalls);
     }
 }

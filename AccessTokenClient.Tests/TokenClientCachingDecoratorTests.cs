@@ -212,6 +212,170 @@ public class TokenClientCachingDecoratorTests
         messageHandler.NumberOfCalls.ShouldBe(1);
     }
 
+    [Theory]
+    [InlineData(1)]
+    [InlineData(300)]
+    public async Task EnsureTokenResponseIsNotCachedWhenBufferedLifetimeIsNotPositive(int expiresIn)
+    {
+        var decoratedClient = new Mock<ITokenClient>();
+        decoratedClient
+            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TokenResponse
+            {
+                AccessToken = "1234567890",
+                ExpiresIn   = expiresIn
+            });
+
+        var decorator = new TokenClientCachingDecorator(
+            new NullLogger<TokenClientCachingDecorator>(),
+            decoratedClient.Object,
+            new TokenClientCacheOptions(),
+            new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions())),
+            new TokenRequestKeyGenerator(),
+            new DefaultAccessTokenTransformer());
+
+        var request = new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        };
+
+        var firstResponse = await decorator.RequestAccessToken(request);
+        var secondResponse = await decorator.RequestAccessToken(request);
+
+        firstResponse.AccessToken.ShouldBe("1234567890");
+        secondResponse.AccessToken.ShouldBe("1234567890");
+        decoratedClient.Verify(
+            m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()),
+            Times.Exactly(2));
+    }
+
+    [Fact]
+    public async Task EnsureTokenResponseUsesExactBufferedLifetime()
+    {
+        var decoratedClient = new Mock<ITokenClient>();
+        decoratedClient
+            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TokenResponse
+            {
+                AccessToken = "1234567890",
+                ExpiresIn   = 359
+            });
+
+        var cache = new Mock<ITokenResponseCache>();
+
+        cache
+            .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((TokenResponse?)null);
+        cache
+            .Setup(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var decorator = new TokenClientCachingDecorator(
+            new NullLogger<TokenClientCachingDecorator>(),
+            decoratedClient.Object,
+            new TokenClientCacheOptions(),
+            cache.Object,
+            new TokenRequestKeyGenerator(),
+            new DefaultAccessTokenTransformer());
+
+        await decorator.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        });
+
+        cache.Verify(m => m.Set(
+            It.IsAny<string>(),
+            It.IsAny<TokenResponse>(),
+            TimeSpan.FromSeconds(59),
+            It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task EnsureCacheReadFailureFallsBackToDecoratedClient()
+    {
+        var decoratedClient = new Mock<ITokenClient>();
+        decoratedClient
+            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TokenResponse
+            {
+                AccessToken = "1234567890",
+                ExpiresIn   = 3600
+            });
+
+        var cache = new Mock<ITokenResponseCache>();
+        cache
+            .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Cache unavailable."));
+        cache
+            .Setup(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var decorator = new TokenClientCachingDecorator(
+            new NullLogger<TokenClientCachingDecorator>(),
+            decoratedClient.Object,
+            new TokenClientCacheOptions(),
+            cache.Object,
+            new TokenRequestKeyGenerator(),
+            new DefaultAccessTokenTransformer());
+
+        var response = await decorator.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        });
+
+        response.AccessToken.ShouldBe("1234567890");
+        decoratedClient.Verify(
+            m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()),
+            Times.Once);
+    }
+
+    [Fact]
+    public async Task EnsureCacheWriteFailureReturnsAcquiredToken()
+    {
+        var decoratedClient = new Mock<ITokenClient>();
+        decoratedClient
+            .Setup(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new TokenResponse
+            {
+                AccessToken = "1234567890",
+                ExpiresIn   = 3600
+            });
+
+        var cache = new Mock<ITokenResponseCache>();
+        cache
+            .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((TokenResponse?)null);
+        cache
+            .Setup(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("Cache unavailable."));
+
+        var transformer = new Mock<IAccessTokenTransformer>();
+        transformer.Setup(m => m.Convert("1234567890")).Returns("converted-token");
+
+        var decorator = new TokenClientCachingDecorator(
+            new NullLogger<TokenClientCachingDecorator>(),
+            decoratedClient.Object,
+            new TokenClientCacheOptions(),
+            cache.Object,
+            new TokenRequestKeyGenerator(),
+            transformer.Object);
+
+        var response = await decorator.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        });
+
+        response.AccessToken.ShouldBe("1234567890");
+    }
+
     [Fact]
     public void EnsureExceptionThrownWhenCancellationRequested()
     {

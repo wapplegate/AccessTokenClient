@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -32,13 +31,25 @@ public class TokenRequestKeyGenerator : IKeyGenerator
 
     private static string GenerateConcatenatedRequest(TokenRequest request)
     {
-        var tokenEndpoint    = request.TokenEndpoint;
-        var clientIdentifier = request.ClientIdentifier;
-        var clientSecret     = request.ClientSecret;
-        var scopes           = string.Join(",", request.Scopes.Select(s => s));
+        var builder = new StringBuilder();
 
-        var concatenated = $"{tokenEndpoint}:{clientIdentifier}:{clientSecret}:{scopes}";
+        AppendValue(builder, request.TokenEndpoint);
+        AppendValue(builder, request.ClientIdentifier);
+        AppendValue(builder, request.ClientSecret);
 
-        return concatenated;
+        var scopes = request.Scopes ?? [];
+        builder.Append(scopes.Length).Append(':');
+
+        foreach (var scope in scopes)
+        {
+            AppendValue(builder, scope);
+        }
+
+        return builder.ToString();
+    }
+
+    private static void AppendValue(StringBuilder builder, string? value)
+    {
+        builder.Append(value?.Length ?? -1).Append(':').Append(value);
     }
 }

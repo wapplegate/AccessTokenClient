@@ -118,4 +118,50 @@ public class TokenRequestKeyGeneratorTests
 
         keyOne.ShouldNotBeSameAs(keyTwo);
     }
+
+    [Fact]
+    public void EnsureFieldBoundariesGenerateDifferentKeys()
+    {
+        var generator = new TokenRequestKeyGenerator();
+
+        var keyOne = generator.GenerateTokenRequestKey(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com/token:a",
+            ClientIdentifier = "b",
+            ClientSecret     = "c"
+        }, "AccessTokenClient");
+
+        var keyTwo = generator.GenerateTokenRequestKey(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com/token",
+            ClientIdentifier = "a:b",
+            ClientSecret     = "c"
+        }, "AccessTokenClient");
+
+        keyOne.ShouldNotBe(keyTwo);
+    }
+
+    [Fact]
+    public void EnsureScopeBoundariesGenerateDifferentKeys()
+    {
+        var generator = new TokenRequestKeyGenerator();
+
+        var keyOne = generator.GenerateTokenRequestKey(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com/token",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["read,write"]
+        }, "AccessTokenClient");
+
+        var keyTwo = generator.GenerateTokenRequestKey(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com/token",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["read", "write"]
+        }, "AccessTokenClient");
+
+        keyOne.ShouldNotBe(keyTwo);
+    }
 }

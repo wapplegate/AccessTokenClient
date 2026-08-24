@@ -63,7 +63,21 @@ public class TokenClientCachingDecorator : ITokenClient
 
         logger.LogDebug("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
 
-        var cachedTokenResponse = await cache.Get(key, cancellationToken);
+        TokenResponse? cachedTokenResponse;
+
+        try
+        {
+            cachedTokenResponse = await cache.Get(key, cancellationToken);
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
+        {
+            logger.LogWarning(exception, "Unable to retrieve the token response with key '{Key}' from the cache.", key);
+            cachedTokenResponse = null;
+        }
 
         if (cachedTokenResponse != null)
         {
@@ -87,23 +101,48 @@ public class TokenClientCachingDecorator : ITokenClient
     {
         logger.LogDebug("Attempting to store token response with key '{Key}' in the cache.", key);
 
-        var expirationTimeSpan = TimeSpan.FromMinutes(tokenResponse.ExpiresIn / 60 - options.ExpirationBuffer);
+        var expirationTimeSpan = TimeSpan.FromSeconds(tokenResponse.ExpiresIn) - TimeSpan.FromMinutes(options.ExpirationBuffer);
+
+        if (expirationTimeSpan <= TimeSpan.Zero)
+        {
+            logger.LogDebug("Skipping the token response cache because its buffered lifetime is not positive.");
+            return;
+        }
 
         var accessTokenValue = tokenResponse.AccessToken;
 
         tokenResponse.AccessToken = transformer.Convert(tokenResponse.AccessToken);
 
-        var tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, cancellationToken);
-
-        if (tokenStoredSuccessfully)
+        try
         {
-            logger.LogDebug("Successfully stored token response with key '{Key}' in the cache.", key);
-        }
-        else
-        {
-            logger.LogWarning("Unable to store token response with key '{Key}' in the cache.", key);
-        }
+            bool tokenStoredSuccessfully;
 
-        tokenResponse.AccessToken = accessTokenValue;
+            try
+            {
+                tokenStoredSuccessfully = await cache.Set(key, tokenResponse, expirationTimeSpan, cancellationToken);
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch (Exception exception)
+            {
+                logger.LogWarning(exception, "Unable to store token response with key '{Key}' in the cache.", key);
+                return;
+            }
+
+            if (tokenStoredSuccessfully)
+            {
+                logger.LogDebug("Successfully stored token response with key '{Key}' in the cache.", key);
+            }
+            else
+            {
+                logger.LogWarning("Unable to store token response with key '{Key}' in the cache.", key);
+            }
+        }
+        finally
+        {
+            tokenResponse.AccessToken = accessTokenValue;
+        }
     }
 }

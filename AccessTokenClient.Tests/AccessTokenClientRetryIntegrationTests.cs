@@ -12,12 +12,13 @@ namespace AccessTokenClient.Tests;
 public class AccessTokenClientRetryIntegrationTests
 {
     [Theory]
-    [InlineData(HttpStatusCode.NotFound)]
-    [InlineData(HttpStatusCode.RequestTimeout)]
-    [InlineData(HttpStatusCode.InternalServerError)]
-    [InlineData(HttpStatusCode.ServiceUnavailable)]
-    [InlineData(HttpStatusCode.GatewayTimeout)]
-    public async Task Test(HttpStatusCode statusCode)
+    [InlineData(HttpStatusCode.NotFound, 1)]
+    [InlineData(HttpStatusCode.TooManyRequests, 3)]
+    [InlineData(HttpStatusCode.RequestTimeout, 3)]
+    [InlineData(HttpStatusCode.InternalServerError, 3)]
+    [InlineData(HttpStatusCode.ServiceUnavailable, 3)]
+    [InlineData(HttpStatusCode.GatewayTimeout, 3)]
+    public async Task Test(HttpStatusCode statusCode, int expectedCalls)
     {
         var mockHandler = new MockHttpMessageHandler(string.Empty, statusCode);
 
@@ -55,6 +56,6 @@ public class AccessTokenClientRetryIntegrationTests
 
         await func.ShouldThrowAsync<Exception>();
 
-        mockHandler.NumberOfCalls.ShouldBe(3);
+        mockHandler.NumberOfCalls.ShouldBe(expectedCalls);
     }
 }
