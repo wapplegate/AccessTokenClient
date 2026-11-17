@@ -43,7 +43,7 @@ public class TokenClient : ITokenClient
 
         try
         {
-            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken).ConfigureAwait(false);
+            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken);
 
             return tokenResponse;
         }
@@ -87,16 +87,16 @@ public class TokenClient : ITokenClient
 
         requestMessage.Content = new FormUrlEncodedContent(parameters);
 
-        using var responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
+        using var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
 
         if (!responseMessage.IsSuccessStatusCode)
         {
-            throw await CreateTokenRequestException(responseMessage, cancellationToken).ConfigureAwait(false);
+            throw await CreateTokenRequestException(responseMessage, cancellationToken);
         }
 
-        var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+        var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
-        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken).ConfigureAwait(false);
+        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken);
 
         if (tokenResponse == null)
         {
@@ -122,7 +122,7 @@ public class TokenClient : ITokenClient
         var message = $"The token request failed with status code {statusCode}.";
 
         // Token endpoints describe the failure in the response content, so include it in the message when available:
-        var responseContent = await responseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+        var responseContent = await responseMessage.Content.ReadAsStringAsync(cancellationToken);
 
         if (!string.IsNullOrWhiteSpace(responseContent))
         {

@@ -68,7 +68,7 @@ public class TokenClientCachingDecorator : ITokenClient
 
         var key = keyGenerator.GenerateTokenRequestKey(request, options.CacheKeyPrefix);
 
-        var cachedTokenResponse = await GetCachedTokenResponse(key, cancellationToken).ConfigureAwait(false);
+        var cachedTokenResponse = await GetCachedTokenResponse(key, cancellationToken);
 
         if (cachedTokenResponse != null)
         {
@@ -79,11 +79,11 @@ public class TokenClientCachingDecorator : ITokenClient
         // concurrent requests wait and then use the token response that was cached:
         var semaphore = Locks.GetOrAdd(key, _ => new SemaphoreSlim(1, 1));
 
-        await semaphore.WaitAsync(cancellationToken).ConfigureAwait(false);
+        await semaphore.WaitAsync(cancellationToken);
 
         try
         {
-            cachedTokenResponse = await GetCachedTokenResponse(key, cancellationToken).ConfigureAwait(false);
+            cachedTokenResponse = await GetCachedTokenResponse(key, cancellationToken);
 
             if (cachedTokenResponse != null)
             {
@@ -92,9 +92,9 @@ public class TokenClientCachingDecorator : ITokenClient
 
             logger.LogDebug("Token response with key '{Key}' does not exist in the cache.", key);
 
-            var tokenResponse = await decoratedClient.RequestAccessToken(request, cancellationToken).ConfigureAwait(false);
+            var tokenResponse = await decoratedClient.RequestAccessToken(request, cancellationToken);
 
-            await CacheTokenResponse(key, tokenResponse, cancellationToken).ConfigureAwait(false);
+            await CacheTokenResponse(key, tokenResponse, cancellationToken);
 
             return tokenResponse;
         }
@@ -108,7 +108,7 @@ public class TokenClientCachingDecorator : ITokenClient
     {
         logger.LogDebug("Attempting to retrieve the token response with key '{Key}' from the cache.", key);
 
-        var cachedTokenResponse = await cache.Get(key, cancellationToken).ConfigureAwait(false);
+        var cachedTokenResponse = await cache.Get(key, cancellationToken);
 
         if (cachedTokenResponse == null)
         {
@@ -149,7 +149,7 @@ public class TokenClientCachingDecorator : ITokenClient
             ExpiresIn   = tokenResponse.ExpiresIn
         };
 
-        var tokenStoredSuccessfully = await cache.Set(key, cacheEntry, expirationTimeSpan, cancellationToken).ConfigureAwait(false);
+        var tokenStoredSuccessfully = await cache.Set(key, cacheEntry, expirationTimeSpan, cancellationToken);
 
         if (tokenStoredSuccessfully)
         {
