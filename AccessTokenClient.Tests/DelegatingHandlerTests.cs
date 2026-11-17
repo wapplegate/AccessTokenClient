@@ -11,7 +11,7 @@ public class DelegatingHandlerTests
     public void EnsureExceptionThrownWhenOptionsAreNull()
     {
         ITokenRequestOptions options = new Options();
-        Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
+        Action action = () => _ = new AccessTokenDelegatingHandler(options, null!);
 
         action.ShouldThrow<ArgumentNullException>();
     }
@@ -20,7 +20,7 @@ public class DelegatingHandlerTests
     public void EnsureExceptionThrownWhenTokenClientIsNull()
     {
         var mockClient = new Mock<ITokenClient>();
-        Action action = () => _ = new AccessTokenDelegatingHandler(null, mockClient.Object);
+        Action action = () => _ = new AccessTokenDelegatingHandler(null!, mockClient.Object);
 
         action.ShouldThrow<ArgumentNullException>();
     }
@@ -47,6 +47,10 @@ public class DelegatingHandlerTests
 
         var invoker = new HttpMessageInvoker(handler);
         await invoker.SendAsync(httpRequestMessage, new CancellationToken());
+
+        httpRequestMessage.Headers.Authorization.ShouldNotBeNull();
+        httpRequestMessage.Headers.Authorization.Scheme.ShouldBe("Bearer");
+        httpRequestMessage.Headers.Authorization.Parameter.ShouldBe("1234567890");
     }
 }
 
@@ -60,11 +64,11 @@ public class TestHandler : DelegatingHandler
 
 public class Options : ITokenRequestOptions
 {
-    public string TokenEndpoint { get; set; }
+    public string TokenEndpoint { get; set; } = string.Empty;
 
-    public string ClientIdentifier { get; set; }
+    public string ClientIdentifier { get; set; } = string.Empty;
 
-    public string ClientSecret { get; set; }
+    public string ClientSecret { get; set; } = string.Empty;
 
     public string[] Scopes { get; set; } = [];
 }
