@@ -37,7 +37,12 @@ public class MemoryTokenResponseCache : ITokenResponseCache
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        cache.Set(key, response, expiration);
+        // A memory cache with a size limit rejects entries that do not specify a size, so each token response counts as one unit:
+        cache.Set(key, response, new MemoryCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = expiration,
+            Size                            = 1
+        });
 
         return Task.FromResult(true);
     }

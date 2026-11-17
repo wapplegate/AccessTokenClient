@@ -45,11 +45,11 @@ public interface ITestingClient
 
 public class TestingClientOptions : ITokenRequestOptions
 {
-    public string TokenEndpoint { get; set; } = string.Empty;
+    public required string TokenEndpoint { get; set; }
 
-    public string ClientIdentifier { get; set; } = string.Empty;
+    public required string ClientIdentifier { get; set; }
 
-    public string ClientSecret { get; set; } = string.Empty;
+    public required string ClientSecret { get; set; }
 
     public string[] Scopes { get; set; } = [];
 }

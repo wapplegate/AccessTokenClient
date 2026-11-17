@@ -10,7 +10,12 @@ public class DelegatingHandlerTests
     [Fact]
     public void EnsureExceptionThrownWhenOptionsAreNull()
     {
-        ITokenRequestOptions options = new Options();
+        ITokenRequestOptions options = new Options
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        };
         Action action = () => _ = new AccessTokenDelegatingHandler(options, null!);
 
         action.ShouldThrow<ArgumentNullException>();
@@ -28,7 +33,12 @@ public class DelegatingHandlerTests
     [Fact]
     public async Task EnsureAccessTokenAddedToRequest()
     {
-        ITokenRequestOptions options = new Options();
+        ITokenRequestOptions options = new Options
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        };
         var mockClient = new Mock<ITokenClient>();
 
         mockClient
@@ -64,11 +74,11 @@ public class TestHandler : DelegatingHandler
 
 public class Options : ITokenRequestOptions
 {
-    public string TokenEndpoint { get; set; } = string.Empty;
+    public required string TokenEndpoint { get; set; }
 
-    public string ClientIdentifier { get; set; } = string.Empty;
+    public required string ClientIdentifier { get; set; }
 
-    public string ClientSecret { get; set; } = string.Empty;
+    public required string ClientSecret { get; set; }
 
     public string[] Scopes { get; set; } = [];
 }

@@ -16,7 +16,12 @@ public class HttpClientBuilderExtensionsTests
 
         services.AddAccessTokenClient();
 
-        services.AddSingleton(new TestClientTokenOptions());
+        services.AddSingleton(new TestClientTokenOptions
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        });
 
         services.AddHttpClient<TestClient>().AddClientAccessTokenHandler<TestClientTokenOptions>();
 
@@ -39,11 +44,11 @@ public class HttpClientBuilderExtensionsTests
 
     private class TestClientTokenOptions : ITokenRequestOptions
     {
-        public string TokenEndpoint { get; set; } = string.Empty;
+        public required string TokenEndpoint { get; set; }
 
-        public string ClientIdentifier { get; set; } = string.Empty;
+        public required string ClientIdentifier { get; set; }
 
-        public string ClientSecret { get; set; } = string.Empty;
+        public required string ClientSecret { get; set; }
 
         public string[] Scopes { get; set; } = [];
     }
