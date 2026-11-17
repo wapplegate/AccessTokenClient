@@ -45,6 +45,8 @@ public void ConfigureServices(IServiceCollection services)
 
 An implementation of `IMemoryCache` will need to be registered using the `AddMemoryCache` service collection extension method provided by Microsoft in order to use the `MemoryTokenResponseCache`. The `AddAccessTokenClientCache` method accepts a type argument which must implement the `ITokenResponseCache` interface. A custom token response cache can implement this interface and be used instead of the default token cache. A common usage scenario might include using a distributed cache for access token caching instead of a memory cache.
 
+The `AddAccessTokenClientCache` method must be called after `AddAccessTokenClient`. An `InvalidOperationException` is thrown if the token client has not been registered.
+
 There are two configuration options available when using the `AddAccessTokenClientCache` method:
 
 ```csharp
@@ -55,7 +57,9 @@ services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCac
 });
 ```
 
-The `ExpirationBuffer` option allows an expiration buffer to be set in minutes. This buffer will reduce the time the access token is cached for to ensure the token is not cached longer than its lifetime. By default the buffer is set to 5 minutes unless changed. The `CacheKeyPrefix` option allows a custom cache key prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
+The `ExpirationBuffer` option allows an expiration buffer to be set in minutes. This buffer will reduce the time the access token is cached for to ensure the token is not cached longer than its lifetime. By default the buffer is set to 5 minutes unless changed. An access token with a lifetime that is not longer than the buffer is returned but not cached. The `CacheKeyPrefix` option allows a custom cache key prefix to be used for the generated cache key. By default it is set to `AccessTokenClient`.
+
+When caching is enabled and multiple requests are made concurrently for an access token that is not in the cache, only one request is sent to the token endpoint. The remaining requests wait and then use the cached access token.
 
 ## Usage
 

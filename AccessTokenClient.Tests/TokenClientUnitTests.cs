@@ -180,4 +180,116 @@ public class TokenClientUnitTests
 
         await function.ShouldThrowAsync<ArgumentException>();
     }
+
+    [Fact]
+    public async Task EnsureExceptionThrownWhenTokenRequestIsNull()
+    {
+        var logger = new NullLogger<TokenClient>();
+        var messageHandler = new MockHttpMessageHandler(string.Empty, HttpStatusCode.OK);
+        var httpClient = new HttpClient(messageHandler);
+
+        var tokenClient = new TokenClient(logger, httpClient);
+
+        Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(null!);
+
+        await function.ShouldThrowAsync<ArgumentNullException>();
+
+        messageHandler.NumberOfCalls.ShouldBe(0);
+    }
+
+    [Fact]
+    public async Task EnsureScopeParameterIsSentWhenScopesAreSpecified()
+    {
+        const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+        var logger = new NullLogger<TokenClient>();
+        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+        var httpClient = new HttpClient(messageHandler);
+
+        var tokenClient = new TokenClient(logger, httpClient);
+
+        await tokenClient.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope:read", "scope:write"]
+        });
+
+        messageHandler.Input.ShouldBe("client_id=client-identifier&client_secret=client-secret&grant_type=client_credentials&scope=scope%3Aread+scope%3Awrite");
+    }
+
+    [Fact]
+    public async Task EnsureScopeParameterIsNotSentWhenScopesAreNotSpecified()
+    {
+        const string Response = @"{""access_token"":""1234567890"",""token_type"":""Bearer"",""expires_in"":7199}";
+
+        var logger = new NullLogger<TokenClient>();
+        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.OK);
+        var httpClient = new HttpClient(messageHandler);
+
+        var tokenClient = new TokenClient(logger, httpClient);
+
+        var tokenResponse = await tokenClient.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        });
+
+        tokenResponse.AccessToken.ShouldBe("1234567890");
+
+        messageHandler.Input.ShouldBe("client_id=client-identifier&client_secret=client-secret&grant_type=client_credentials");
+    }
+
+    [Fact]
+    public async Task EnsureExceptionContainsStatusCodeAndResponseContentWhenTokenRequestFails()
+    {
+        const string Response = @"{""error"":""invalid_client"",""error_description"":""The client secret is invalid.""}";
+
+        var logger = new NullLogger<TokenClient>();
+        var messageHandler = new MockHttpMessageHandler(Response, HttpStatusCode.BadRequest);
+        var httpClient = new HttpClient(messageHandler);
+
+        var tokenClient = new TokenClient(logger, httpClient);
+
+        Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope:read"]
+        });
+
+        var exception = await function.ShouldThrowAsync<HttpRequestException>();
+
+        exception.StatusCode.ShouldBe(HttpStatusCode.BadRequest);
+        exception.Message.ShouldContain("400");
+        exception.Message.ShouldContain("invalid_client");
+    }
+
+    [Fact]
+    public async Task EnsureExceptionMessageIsTruncatedWhenResponseContentIsLarge()
+    {
+        var response = new string('a', 5000);
+
+        var logger = new NullLogger<TokenClient>();
+        var messageHandler = new MockHttpMessageHandler(response, HttpStatusCode.InternalServerError);
+        var httpClient = new HttpClient(messageHandler);
+
+        var tokenClient = new TokenClient(logger, httpClient);
+
+        Func<Task<TokenResponse>> function = async () => await tokenClient.RequestAccessToken(new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope:read"]
+        });
+
+        var exception = await function.ShouldThrowAsync<HttpRequestException>();
+
+        exception.StatusCode.ShouldBe(HttpStatusCode.InternalServerError);
+        exception.Message.Length.ShouldBeLessThan(1200);
+    }
 }

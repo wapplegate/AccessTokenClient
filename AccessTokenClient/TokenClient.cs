@@ -14,6 +14,8 @@ namespace AccessTokenClient;
 /// </summary>
 public class TokenClient : ITokenClient
 {
+    private const int MaximumErrorContentLength = 1024;
+
     private readonly ILogger<TokenClient> logger;
 
     private readonly HttpClient client;
@@ -37,9 +39,11 @@ public class TokenClient : ITokenClient
     /// <returns>The token response.</returns>
     public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         try
         {
-            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken);
+            var tokenResponse = await ExecuteTokenRequest(request, cancellationToken).ConfigureAwait(false);
 
             return tokenResponse;
         }
@@ -64,29 +68,35 @@ public class TokenClient : ITokenClient
 
         var uri = new Uri(request.TokenEndpoint);
 
+        var parameters = new List<KeyValuePair<string, string>>
+        {
+            new("client_id",     request.ClientIdentifier),
+            new("client_secret", request.ClientSecret),
+            new("grant_type",    "client_credentials")
+        };
+
         var scopes = request.Scopes != null ? string.Join(" ", request.Scopes) : string.Empty;
 
-        var content = new FormUrlEncodedContent([
-            new KeyValuePair<string, string>("client_id",     request.ClientIdentifier),
-            new KeyValuePair<string, string>("client_secret", request.ClientSecret),
-            new KeyValuePair<string, string>("grant_type",    "client_credentials"),
-            new KeyValuePair<string, string>("scope",         scopes)
-        ]);
+        // The scope parameter is optional, so it is only sent when scopes have been specified:
+        if (!string.IsNullOrWhiteSpace(scopes))
+        {
+            parameters.Add(new KeyValuePair<string, string>("scope", scopes));
+        }
 
-        var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri) { Content = content };
+        using var requestMessage = new HttpRequestMessage(HttpMethod.Post, uri);
 
-        var responseMessage = await client.SendAsync(requestMessage, cancellationToken);
+        requestMessage.Content = new FormUrlEncodedContent(parameters);
+
+        using var responseMessage = await client.SendAsync(requestMessage, cancellationToken).ConfigureAwait(false);
 
         if (!responseMessage.IsSuccessStatusCode)
         {
-            var statusCode = (int)responseMessage.StatusCode;
-
-            throw new HttpRequestException($"The token request failed with status code {statusCode}.");
+            throw await CreateTokenRequestException(responseMessage, cancellationToken).ConfigureAwait(false);
         }
-            
-        var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
-        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken);
+        var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
+
+        var tokenResponse = await JsonSerializer.DeserializeAsync(responseStream, TokenResponseJsonContext.Default.HttpTokenResponse, cancellationToken).ConfigureAwait(false);
 
         if (tokenResponse == null)
         {
@@ -103,6 +113,28 @@ public class TokenClient : ITokenClient
             AccessToken = tokenResponse.AccessToken,
             ExpiresIn = tokenResponse.ExpiresIn
         };
+    }
+
+    private static async Task<HttpRequestException> CreateTokenRequestException(HttpResponseMessage responseMessage, CancellationToken cancellationToken)
+    {
+        var statusCode = (int)responseMessage.StatusCode;
+
+        var message = $"The token request failed with status code {statusCode}.";
+
+        // Token endpoints describe the failure in the response content, so include it in the message when available:
+        var responseContent = await responseMessage.Content.ReadAsStringAsync(cancellationToken).ConfigureAwait(false);
+
+        if (!string.IsNullOrWhiteSpace(responseContent))
+        {
+            if (responseContent.Length > MaximumErrorContentLength)
+            {
+                responseContent = responseContent[..MaximumErrorContentLength];
+            }
+
+            message = $"{message} Response: {responseContent}";
+        }
+
+        return new HttpRequestException(message, null, responseMessage.StatusCode);
     }
 
     private static bool TokenResponseValid(HttpTokenResponse? response)

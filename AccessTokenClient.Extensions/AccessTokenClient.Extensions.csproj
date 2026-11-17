@@ -15,6 +15,7 @@
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>oauth;oauth2;client-credentials;access-token;token-client;httpclient;dependency-injection</PackageTags>
     <PackageProjectUrl>https://github.com/wapplegate/AccessTokenClient</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wapplegate/AccessTokenClient</RepositoryUrl>
     <RepositoryType>git</RepositoryType>

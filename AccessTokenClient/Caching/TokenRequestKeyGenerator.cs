@@ -1,5 +1,4 @@
 using System;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -13,6 +12,8 @@ public class TokenRequestKeyGenerator : IKeyGenerator
     /// <inheritdoc />
     public string GenerateTokenRequestKey(TokenRequest request, string prefix)
     {
+        ArgumentNullException.ThrowIfNull(request);
+
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientIdentifier);
 
         ArgumentException.ThrowIfNullOrWhiteSpace(request.ClientSecret);
@@ -25,7 +26,7 @@ public class TokenRequestKeyGenerator : IKeyGenerator
 
         var hash = SHA256.HashData(textData);
 
-        var convertedHash = BitConverter.ToString(hash).Replace("-", string.Empty);
+        var convertedHash = Convert.ToHexString(hash);
 
         return $"{prefix}::{convertedHash}";
     }
@@ -35,7 +36,7 @@ public class TokenRequestKeyGenerator : IKeyGenerator
         var tokenEndpoint    = request.TokenEndpoint;
         var clientIdentifier = request.ClientIdentifier;
         var clientSecret     = request.ClientSecret;
-        var scopes           = string.Join(",", request.Scopes.Select(s => s));
+        var scopes           = request.Scopes != null ? string.Join(",", request.Scopes) : string.Empty;
 
         var concatenated = $"{tokenEndpoint}:{clientIdentifier}:{clientSecret}:{scopes}";
 

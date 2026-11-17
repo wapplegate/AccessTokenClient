@@ -41,14 +41,14 @@ public class AccessTokenDelegatingHandler : DelegatingHandler
             ClientIdentifier = options.ClientIdentifier,
             ClientSecret     = options.ClientSecret,
             Scopes           = options.Scopes
-        }, cancellationToken: cancellationToken);
+        }, cancellationToken: cancellationToken).ConfigureAwait(false);
 
         if (result != null && !string.IsNullOrWhiteSpace(result.AccessToken))
         {
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", result.AccessToken);
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
+        var response = await base.SendAsync(request, cancellationToken).ConfigureAwait(false);
 
         return response;
     }
