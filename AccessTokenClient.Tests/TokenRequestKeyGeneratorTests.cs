@@ -118,4 +118,60 @@ public class TokenRequestKeyGeneratorTests
 
         keyOne.ShouldNotBeSameAs(keyTwo);
     }
+
+    [Fact]
+    public void EnsureExceptionThrownWhenTokenRequestIsNull()
+    {
+        var generator = new TokenRequestKeyGenerator();
+
+        Action action = () => generator.GenerateTokenRequestKey(null!, "AccessTokenClient");
+
+        action.ShouldThrow<ArgumentNullException>();
+    }
+
+    [Fact]
+    public void EnsureKeyGeneratedSuccessfullyWhenScopesAreNull()
+    {
+        var generator = new TokenRequestKeyGenerator();
+
+        var requestWithNullScopes = new TokenRequest
+        {
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = null!,
+            TokenEndpoint    = "https://www.token-endpoint.com"
+        };
+
+        var requestWithEmptyScopes = new TokenRequest
+        {
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = [],
+            TokenEndpoint    = "https://www.token-endpoint.com"
+        };
+
+        var keyOne = generator.GenerateTokenRequestKey(requestWithNullScopes, "AccessTokenClient");
+        var keyTwo = generator.GenerateTokenRequestKey(requestWithEmptyScopes, "AccessTokenClient");
+
+        keyOne.ShouldBe(keyTwo);
+    }
+
+    [Fact]
+    public void EnsureGeneratedKeyHasExpectedFormat()
+    {
+        var generator = new TokenRequestKeyGenerator();
+
+        var request = new TokenRequest
+        {
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope_1", "scope_2", "scope_3"],
+            TokenEndpoint    = "https://www.token-endpoint.com"
+        };
+
+        var key = generator.GenerateTokenRequestKey(request, "AccessTokenClient");
+
+        // The prefix followed by an uppercase hexadecimal SHA-256 hash:
+        key.ShouldMatch("^AccessTokenClient::[0-9A-F]{64}$");
+    }
 }

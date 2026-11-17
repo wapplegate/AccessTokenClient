@@ -47,7 +47,9 @@ services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCac
 });
 ```
 
-`ExpirationBuffer` is the number of minutes subtracted from the token's lifetime when it is cached, so a token is never cached longer than it is valid. `CacheKeyPrefix` is the prefix used for generated cache keys. The values shown are the defaults.
+`ExpirationBuffer` is the number of minutes subtracted from the token's lifetime when it is cached, so a token is never cached longer than it is valid. A token with a lifetime that is not longer than the buffer is returned but not cached. `CacheKeyPrefix` is the prefix used for generated cache keys. The values shown are the defaults.
+
+`AddAccessTokenClientCache` must be called after `AddAccessTokenClient`; an `InvalidOperationException` is thrown otherwise.
 
 The type argument must implement `ITokenResponseCache`, so a custom cache such as a distributed cache can be used in place of `MemoryTokenResponseCache`.
 

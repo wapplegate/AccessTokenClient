@@ -242,4 +242,241 @@ public class TokenClientCachingDecoratorTests
 
         creationAction.ShouldThrowAsync<OperationCanceledException>();
     }
+
+    [Fact]
+    public async Task EnsureExceptionThrownWhenTokenRequestIsNull()
+    {
+        var decorator = CreateDecorator(new StubTokenClient(expiresIn: 3600), new DefaultAccessTokenTransformer(), CreateMemoryCache());
+
+        Func<Task<TokenResponse>> function = async () => await decorator.RequestAccessToken(null!);
+
+        await function.ShouldThrowAsync<ArgumentNullException>();
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(60)]
+    [InlineData(299)]
+    [InlineData(300)]
+    public async Task EnsureTokenResponseIsReturnedAndNotCachedWhenTokenLifetimeIsShorterThanExpirationBuffer(int expiresIn)
+    {
+        var tokenClient = new StubTokenClient(expiresIn);
+
+        var cacheMock = new Mock<ITokenResponseCache>();
+        cacheMock.Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>())).ReturnsAsync((TokenResponse?)null);
+
+        var decorator = CreateDecorator(tokenClient, new DefaultAccessTokenTransformer(), cacheMock.Object);
+
+        var tokenResponse = await decorator.RequestAccessToken(CreateTokenRequest());
+
+        tokenResponse.AccessToken.ShouldBe("1234567890");
+        tokenResponse.ExpiresIn.ShouldBe(expiresIn);
+
+        tokenClient.NumberOfCalls.ShouldBe(1);
+
+        cacheMock.Verify(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task EnsureTokenResponseIsReturnedWhenTokenLifetimeIsShorterThanExpirationBufferUsingMemoryCache()
+    {
+        var tokenClient = new StubTokenClient(expiresIn: 300);
+
+        var decorator = CreateDecorator(tokenClient, new DefaultAccessTokenTransformer(), CreateMemoryCache());
+
+        var first  = await decorator.RequestAccessToken(CreateTokenRequest());
+        var second = await decorator.RequestAccessToken(CreateTokenRequest());
+
+        first.AccessToken.ShouldBe("1234567890");
+        second.AccessToken.ShouldBe("1234567890");
+
+        tokenClient.NumberOfCalls.ShouldBe(2);
+    }
+
+    [Fact]
+    public async Task EnsureTokenResponseIsCachedForTheTokenLifetimeMinusTheExpirationBuffer()
+    {
+        var cacheMock = new Mock<ITokenResponseCache>();
+
+        cacheMock
+            .Setup(m => m.Get(It.IsAny<string>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync((TokenResponse?)null);
+
+        cacheMock
+            .Setup(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), It.IsAny<TimeSpan>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(true);
+
+        var decorator = CreateDecorator(new StubTokenClient(expiresIn: 7199), new DefaultAccessTokenTransformer(), cacheMock.Object);
+
+        await decorator.RequestAccessToken(CreateTokenRequest());
+
+        // 7199 seconds minus the default five minute buffer:
+        cacheMock.Verify(m => m.Set(It.IsAny<string>(), It.IsAny<TokenResponse>(), TimeSpan.FromSeconds(6899), It.IsAny<CancellationToken>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task EnsureOriginalAccessTokenIsReturnedWhenTransformerIsUsedWithMemoryCache()
+    {
+        var tokenClient = new StubTokenClient(expiresIn: 3600);
+
+        var memoryCache = new MemoryCache(new MemoryCacheOptions());
+
+        var decorator = CreateDecorator(tokenClient, new ReversingAccessTokenTransformer(), new MemoryTokenResponseCache(memoryCache));
+
+        var request = CreateTokenRequest();
+
+        var first  = await decorator.RequestAccessToken(request);
+        var second = await decorator.RequestAccessToken(request);
+        var third  = await decorator.RequestAccessToken(request);
+
+        first.AccessToken.ShouldBe("1234567890");
+        second.AccessToken.ShouldBe("1234567890");
+        third.AccessToken.ShouldBe("1234567890");
+
+        tokenClient.NumberOfCalls.ShouldBe(1);
+
+        // The converted access token is the value that should be held by the cache:
+        var key = new TokenRequestKeyGenerator().GenerateTokenRequestKey(request, new TokenClientCacheOptions().CacheKeyPrefix);
+
+        memoryCache.Get<TokenResponse>(key)!.AccessToken.ShouldBe("0987654321");
+    }
+
+    [Fact]
+    public async Task EnsureCachedTokenResponseIsNotModifiedWhenReturnedTokenResponseIsChanged()
+    {
+        var decorator = CreateDecorator(new StubTokenClient(expiresIn: 3600), new DefaultAccessTokenTransformer(), CreateMemoryCache());
+
+        var request = CreateTokenRequest();
+
+        var first = await decorator.RequestAccessToken(request);
+
+        first.AccessToken = "modified";
+
+        var second = await decorator.RequestAccessToken(request);
+
+        second.ShouldNotBeSameAs(first);
+        second.AccessToken.ShouldBe("1234567890");
+
+        second.AccessToken = "modified";
+
+        var third = await decorator.RequestAccessToken(request);
+
+        third.AccessToken.ShouldBe("1234567890");
+    }
+
+    [Fact]
+    public async Task EnsureTokenEndpointIsOnlyCalledOnceWhenConcurrentRequestsAreMade()
+    {
+        var tokenClient = new StubTokenClient(expiresIn: 3600, delay: TimeSpan.FromMilliseconds(100));
+
+        var cache = CreateMemoryCache();
+
+        // The token client is transient, so use a separate decorator instance for each request:
+        var tasks = Enumerable.Range(0, 25).Select(_ => Task.Run(() =>
+        {
+            var decorator = CreateDecorator(tokenClient, new DefaultAccessTokenTransformer(), cache);
+
+            return decorator.RequestAccessToken(CreateTokenRequest());
+        }));
+
+        var tokenResponses = await Task.WhenAll(tasks);
+
+        tokenResponses.ShouldAllBe(response => response.AccessToken == "1234567890");
+
+        tokenClient.NumberOfCalls.ShouldBe(1);
+    }
+
+    [Fact]
+    public async Task EnsureTokenRequestCanBeRetriedWhenPreviousRequestFails()
+    {
+        var tokenClientMock = new Mock<ITokenClient>();
+
+        tokenClientMock
+            .SetupSequence(m => m.RequestAccessToken(It.IsAny<TokenRequest>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new HttpRequestException("The token request failed."))
+            .ReturnsAsync(new TokenResponse { AccessToken = "1234567890", ExpiresIn = 3600 });
+
+        var decorator = CreateDecorator(tokenClientMock.Object, new DefaultAccessTokenTransformer(), CreateMemoryCache());
+
+        var request = CreateTokenRequest();
+
+        Func<Task<TokenResponse>> function = async () => await decorator.RequestAccessToken(request);
+
+        await function.ShouldThrowAsync<HttpRequestException>();
+
+        var tokenResponse = await decorator.RequestAccessToken(request).WaitAsync(TimeSpan.FromSeconds(10));
+
+        tokenResponse.AccessToken.ShouldBe("1234567890");
+    }
+
+    private static TokenClientCachingDecorator CreateDecorator(ITokenClient tokenClient, IAccessTokenTransformer transformer, ITokenResponseCache cache)
+    {
+        return new TokenClientCachingDecorator(
+            new NullLogger<TokenClientCachingDecorator>(),
+            tokenClient,
+            new TokenClientCacheOptions(),
+            cache,
+            new TokenRequestKeyGenerator(),
+            transformer
+        );
+    }
+
+    private static MemoryTokenResponseCache CreateMemoryCache()
+    {
+        return new MemoryTokenResponseCache(new MemoryCache(new MemoryCacheOptions()));
+    }
+
+    private static TokenRequest CreateTokenRequest()
+    {
+        return new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope:read"]
+        };
+    }
+
+    private sealed class StubTokenClient : ITokenClient
+    {
+        private readonly int expiresIn;
+
+        private readonly TimeSpan delay;
+
+        private int numberOfCalls;
+
+        public StubTokenClient(int expiresIn, TimeSpan delay = default)
+        {
+            this.expiresIn = expiresIn;
+            this.delay     = delay;
+        }
+
+        public int NumberOfCalls => numberOfCalls;
+
+        public async Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
+        {
+            Interlocked.Increment(ref numberOfCalls);
+
+            await Task.Delay(delay, cancellationToken);
+
+            return new TokenResponse
+            {
+                AccessToken = "1234567890",
+                ExpiresIn   = expiresIn
+            };
+        }
+    }
+
+    private sealed class ReversingAccessTokenTransformer : IAccessTokenTransformer
+    {
+        public string Convert(string accessToken)
+        {
+            return new string(accessToken.Reverse().ToArray());
+        }
+
+        public string Revert(string value)
+        {
+            return new string(value.Reverse().ToArray());
+        }
+    }
 }

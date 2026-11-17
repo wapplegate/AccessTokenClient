@@ -2,6 +2,7 @@ using AccessTokenClient.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using System;
+using System.Linq;
 using System.Net.Http;
 
 namespace AccessTokenClient.Extensions;
@@ -44,6 +45,9 @@ public static class ServiceCollectionExtensions
     /// <param name="services">The service collection.</param>
     /// <param name="action">An optional action used to configure the token client cache options.</param>
     /// <returns>The service collection instance.</returns>
+    /// <exception cref="InvalidOperationException">
+    /// Thrown when the token client has not been registered using the <see cref="AddAccessTokenClient"/> method.
+    /// </exception>
     public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions>? action = null) where T : ITokenResponseCache
     {
         ArgumentNullException.ThrowIfNull(services);
@@ -58,12 +62,23 @@ public static class ServiceCollectionExtensions
 
         ArgumentException.ThrowIfNullOrWhiteSpace(options.CacheKeyPrefix);
 
+        // Caching has already been enabled, so do not decorate the token client a second time:
+        if (services.Any(descriptor => descriptor.ServiceType == typeof(TokenClientCacheOptions)))
+        {
+            return services;
+        }
+
+        if (services.All(descriptor => descriptor.ServiceType != typeof(ITokenClient)))
+        {
+            throw new InvalidOperationException($"The token client has not been registered. Call {nameof(AddAccessTokenClient)} before calling {nameof(AddAccessTokenClientCache)}.");
+        }
+
         services.TryAddSingleton(options);
         services.TryAddSingleton<IKeyGenerator, TokenRequestKeyGenerator>();
         services.TryAddSingleton(typeof(ITokenResponseCache), typeof(T));
         services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
 
-        services.TryDecorate<ITokenClient, TokenClientCachingDecorator>();
+        services.Decorate<ITokenClient, TokenClientCachingDecorator>();
 
         return services;
     }
