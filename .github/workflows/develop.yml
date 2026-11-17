@@ -9,23 +9,31 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: alpha
+    permissions:
+      contents: read
+      id-token: write
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
     - name: Setup .NET
-      uses: actions/setup-dotnet@v4
+      uses: actions/setup-dotnet@v6
       with:
         dotnet-version: | 
-          8.0.x
-          9.0.x
           10.0.x
+          11.0.x
     - name: Restore
       run: dotnet restore
-    - name: Build, Test, Package, Deploy
+    - name: Build, Test, Package
       run: |
         dotnet build
         dotnet test --no-build --verbosity normal
         dotnet build -c Release
-        dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=5.0.0-rc${{github.run_number}}
-        dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=5.0.0-rc${{github.run_number}}
-        dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
-
+        dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=6.0.0-rc${{github.run_number}}
+        dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages -p:PackageVersion=6.0.0-rc${{github.run_number}}
+    - name: NuGet Login
+      id: login
+      uses: NuGet/login@v1
+      with:
+        user: geth
+    - name: Deploy
+      run: dotnet nuget push ./packages/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
