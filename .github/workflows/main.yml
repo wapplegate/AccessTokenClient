@@ -7,6 +7,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    environment: production
+    permissions:
+      contents: read
+      id-token: write
     steps:
     - uses: actions/checkout@v7
     - name: Setup .NET
@@ -17,12 +21,17 @@ jobs:
           11.0.x
     - name: Restore
       run: dotnet restore
-    - name: Build, Test, Package, Deploy
+    - name: Build, Test, Package
       run: |
         dotnet build
         dotnet test --no-build --verbosity normal
         dotnet build -c Release
         dotnet pack ./AccessTokenClient -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages
         dotnet pack ./AccessTokenClient.Extensions -p:ContinuousIntegrationBuild=true --configuration Release --verbosity minimal -o ./packages
-        dotnet nuget push ./packages/*.nupkg --api-key ${{secrets.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
-        
+    - name: NuGet Login
+      id: login
+      uses: NuGet/login@v1
+      with:
+        user: geth
+    - name: Deploy
+      run: dotnet nuget push ./packages/*.nupkg --api-key ${{steps.login.outputs.NUGET_API_KEY}} --source https://api.nuget.org/v3/index.json
