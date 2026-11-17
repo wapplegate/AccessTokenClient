@@ -14,6 +14,7 @@
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
     <EmbedUntrackedSources>true</EmbedUntrackedSources>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageProjectUrl>https://github.com/wapplegate/AccessTokenClient</PackageProjectUrl>
     <RepositoryUrl>https://github.com/wapplegate/AccessTokenClient</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
@@ -23,14 +24,15 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" />
     <PackageReference Include="Microsoft.Extensions.Http" />
     <PackageReference Include="Microsoft.Extensions.Http.Polly" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Scrutor" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\AccessTokenClient\AccessTokenClient.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
 </Project>
