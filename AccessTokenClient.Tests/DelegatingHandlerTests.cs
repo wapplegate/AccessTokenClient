@@ -10,8 +10,13 @@ public class DelegatingHandlerTests
     [Fact]
     public void EnsureExceptionThrownWhenOptionsAreNull()
     {
-        ITokenRequestOptions options = new Options();
-        Action action = () => _ = new AccessTokenDelegatingHandler(options, null);
+        ITokenRequestOptions options = new Options
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        };
+        Action action = () => _ = new AccessTokenDelegatingHandler(options, null!);
 
         action.ShouldThrow<ArgumentNullException>();
     }
@@ -20,7 +25,7 @@ public class DelegatingHandlerTests
     public void EnsureExceptionThrownWhenTokenClientIsNull()
     {
         var mockClient = new Mock<ITokenClient>();
-        Action action = () => _ = new AccessTokenDelegatingHandler(null, mockClient.Object);
+        Action action = () => _ = new AccessTokenDelegatingHandler(null!, mockClient.Object);
 
         action.ShouldThrow<ArgumentNullException>();
     }
@@ -28,7 +33,12 @@ public class DelegatingHandlerTests
     [Fact]
     public async Task EnsureAccessTokenAddedToRequest()
     {
-        ITokenRequestOptions options = new Options();
+        ITokenRequestOptions options = new Options
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret"
+        };
         var mockClient = new Mock<ITokenClient>();
 
         mockClient
@@ -47,6 +57,10 @@ public class DelegatingHandlerTests
 
         var invoker = new HttpMessageInvoker(handler);
         await invoker.SendAsync(httpRequestMessage, new CancellationToken());
+
+        httpRequestMessage.Headers.Authorization.ShouldNotBeNull();
+        httpRequestMessage.Headers.Authorization.Scheme.ShouldBe("Bearer");
+        httpRequestMessage.Headers.Authorization.Parameter.ShouldBe("1234567890");
     }
 }
 
@@ -60,11 +74,11 @@ public class TestHandler : DelegatingHandler
 
 public class Options : ITokenRequestOptions
 {
-    public string TokenEndpoint { get; set; }
+    public required string TokenEndpoint { get; set; }
 
-    public string ClientIdentifier { get; set; }
+    public required string ClientIdentifier { get; set; }
 
-    public string ClientSecret { get; set; }
+    public required string ClientSecret { get; set; }
 
     public string[] Scopes { get; set; } = [];
 }

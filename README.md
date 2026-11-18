@@ -134,13 +134,13 @@ public class TestClient
 
 public class TestClientTokenOptions : ITokenRequestOptions
 {
-    public string TokenEndpoint { get; set; }
+    public required string TokenEndpoint { get; set; }
 
-    public string ClientIdentifier { get; set; }
+    public required string ClientIdentifier { get; set; }
 
-    public string ClientSecret { get; set; }
+    public required string ClientSecret { get; set; }
 
-    public string[] Scopes { get; set; }
+    public string[] Scopes { get; set; } = [];
 }
 ```
 

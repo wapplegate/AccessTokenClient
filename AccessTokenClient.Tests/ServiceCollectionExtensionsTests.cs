@@ -176,4 +176,99 @@ public class ServiceCollectionExtensionsTests
 
         messageHandler.NumberOfCalls.ShouldBe(1);
     }
+
+    [Fact]
+    public void EnsureTokenClientLifetimeIsPreservedWhenCacheAdded()
+    {
+        var services = new ServiceCollection();
+
+        services.AddMemoryCache();
+
+        services.AddAccessTokenClient().AddAccessTokenClientCache<MemoryTokenResponseCache>();
+
+        var descriptor = services.Single(d => d.ServiceType == typeof(ITokenClient));
+
+        descriptor.Lifetime.ShouldBe(ServiceLifetime.Transient);
+
+        var provider = services.BuildServiceProvider();
+
+        var first  = provider.GetRequiredService<ITokenClient>();
+        var second = provider.GetRequiredService<ITokenClient>();
+
+        first.ShouldBeOfType<TokenClientCachingDecorator>();
+        second.ShouldBeOfType<TokenClientCachingDecorator>();
+        first.ShouldNotBeSameAs(second);
+    }
+
+    [Fact]
+    public async Task EnsureTokenClientRegisteredByTypeIsDecorated()
+    {
+        var services = new ServiceCollection();
+
+        services.AddLogging();
+        services.AddMemoryCache();
+        services.AddSingleton<CallCounter>();
+        services.AddSingleton<ITokenClient, StubTokenClient>();
+
+        services.AddAccessTokenClientCache<MemoryTokenResponseCache>();
+
+        await EnsureTokenClientIsDecoratedAndCaches(services);
+    }
+
+    [Fact]
+    public async Task EnsureTokenClientRegisteredByInstanceIsDecorated()
+    {
+        var services = new ServiceCollection();
+
+        services.AddLogging();
+        services.AddMemoryCache();
+
+        var counter = new CallCounter();
+        services.AddSingleton(counter);
+        services.AddSingleton<ITokenClient>(new StubTokenClient(counter));
+
+        services.AddAccessTokenClientCache<MemoryTokenResponseCache>();
+
+        await EnsureTokenClientIsDecoratedAndCaches(services);
+    }
+
+    private static async Task EnsureTokenClientIsDecoratedAndCaches(IServiceCollection services)
+    {
+        var provider = services.BuildServiceProvider();
+
+        var client = provider.GetRequiredService<ITokenClient>();
+
+        client.ShouldBeOfType<TokenClientCachingDecorator>();
+
+        var request = new TokenRequest
+        {
+            TokenEndpoint    = "https://www.token-endpoint.com",
+            ClientIdentifier = "client-identifier",
+            ClientSecret     = "client-secret",
+            Scopes           = ["scope:read"]
+        };
+
+        var first  = await client.RequestAccessToken(request);
+        var second = await client.RequestAccessToken(request);
+
+        first.AccessToken.ShouldBe("1234567890");
+        second.AccessToken.ShouldBe("1234567890");
+
+        provider.GetRequiredService<CallCounter>().NumberOfCalls.ShouldBe(1);
+    }
+
+    private sealed class CallCounter
+    {
+        public int NumberOfCalls { get; set; }
+    }
+
+    private sealed class StubTokenClient(CallCounter counter) : ITokenClient
+    {
+        public Task<TokenResponse> RequestAccessToken(TokenRequest request, CancellationToken cancellationToken = default)
+        {
+            counter.NumberOfCalls++;
+
+            return Task.FromResult(new TokenResponse { AccessToken = "1234567890", ExpiresIn = 3600 });
+        }
+    }
 }

@@ -1,0 +1,28 @@
+<Project>
+
+  <!-- Settings shared by the AccessTokenClient and AccessTokenClient.Extensions packages. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' == 'AccessTokenClient' Or '$(MSBuildProjectName)' == 'AccessTokenClient.Extensions'">
+    <TargetFrameworks>net10.0;net11.0</TargetFrameworks>
+    <Version>6.0.0</Version>
+    <Nullable>enable</Nullable>
+    <IsAotCompatible>true</IsAotCompatible>
+    <EnablePackageValidation>true</EnablePackageValidation>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+    <DebugType>embedded</DebugType>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Authors>William Applegate</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageProjectUrl>https://github.com/wapplegate/AccessTokenClient</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/wapplegate/AccessTokenClient</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(MSBuildProjectName)' == 'AccessTokenClient' Or '$(MSBuildProjectName)' == 'AccessTokenClient.Extensions'">
+    <None Include="README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+</Project>

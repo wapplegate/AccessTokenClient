@@ -1,7 +1,9 @@
 using AccessTokenClient.Caching;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Logging;
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Net.Http;
 
@@ -48,7 +50,7 @@ public static class ServiceCollectionExtensions
     /// <exception cref="InvalidOperationException">
     /// Thrown when the token client has not been registered using the <see cref="AddAccessTokenClient"/> method.
     /// </exception>
-    public static IServiceCollection AddAccessTokenClientCache<T>(this IServiceCollection services, Action<TokenClientCacheOptions>? action = null) where T : ITokenResponseCache
+    public static IServiceCollection AddAccessTokenClientCache<[DynamicallyAccessedMembers(DynamicallyAccessedMemberTypes.PublicConstructors)] T>(this IServiceCollection services, Action<TokenClientCacheOptions>? action = null) where T : ITokenResponseCache
     {
         ArgumentNullException.ThrowIfNull(services);
 
@@ -68,7 +70,9 @@ public static class ServiceCollectionExtensions
             return services;
         }
 
-        if (services.All(descriptor => descriptor.ServiceType != typeof(ITokenClient)))
+        var tokenClientDescriptor = services.LastOrDefault(descriptor => descriptor.ServiceType == typeof(ITokenClient) && !descriptor.IsKeyedService);
+
+        if (tokenClientDescriptor == null)
         {
             throw new InvalidOperationException($"The token client has not been registered. Call {nameof(AddAccessTokenClient)} before calling {nameof(AddAccessTokenClientCache)}.");
         }
@@ -78,8 +82,47 @@ public static class ServiceCollectionExtensions
         services.TryAddSingleton(typeof(ITokenResponseCache), typeof(T));
         services.TryAddSingleton<IAccessTokenTransformer, DefaultAccessTokenTransformer>();
 
-        services.Decorate<ITokenClient, TokenClientCachingDecorator>();
+        DecorateTokenClient(services, tokenClientDescriptor);
 
         return services;
+    }
+
+    /// <summary>
+    /// Replaces the token client registration with one that wraps the original token client in the
+    /// <see cref="TokenClientCachingDecorator"/>. The decorator is created directly instead of through
+    /// reflection so its constructor is not removed when the application is trimmed or AOT compiled.
+    /// </summary>
+    private static void DecorateTokenClient(IServiceCollection services, ServiceDescriptor descriptor)
+    {
+        var createTokenClient = GetTokenClientFactory(descriptor);
+
+        var decoratedDescriptor = ServiceDescriptor.Describe(typeof(ITokenClient), provider => new TokenClientCachingDecorator(
+            provider.GetRequiredService<ILogger<TokenClientCachingDecorator>>(),
+            createTokenClient(provider),
+            provider.GetRequiredService<TokenClientCacheOptions>(),
+            provider.GetRequiredService<ITokenResponseCache>(),
+            provider.GetRequiredService<IKeyGenerator>(),
+            provider.GetRequiredService<IAccessTokenTransformer>()
+        ), descriptor.Lifetime);
+
+        services[services.IndexOf(descriptor)] = decoratedDescriptor;
+    }
+
+    private static Func<IServiceProvider, ITokenClient> GetTokenClientFactory(ServiceDescriptor descriptor)
+    {
+        if (descriptor.ImplementationFactory != null)
+        {
+            var factory = descriptor.ImplementationFactory;
+            return provider => (ITokenClient)factory(provider);
+        }
+
+        if (descriptor.ImplementationInstance != null)
+        {
+            var instance = (ITokenClient)descriptor.ImplementationInstance;
+            return _ => instance;
+        }
+
+        var implementationType = descriptor.ImplementationType!;
+        return provider => (ITokenClient)ActivatorUtilities.CreateInstance(provider, implementationType);
     }
 }
